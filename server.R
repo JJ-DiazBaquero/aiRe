@@ -11,20 +11,31 @@ library(shiny)
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
-   
-  <- reactive({
-    
+  
+  yolo <- reactive({
+    cat("El hover",input$dataLoading_hover)
   })
   
-  output$distPlot <- renderPlot({
-    
-    # generate bins based on input$bins from ui.R
-    x    <- faithful[, 2] 
-    bins <- seq(min(x), max(x), length.out = input$bins + 1)
-    
-    # draw the histogram with the specified number of bins
-    hist(x, breaks = bins, col = 'darkgray', border = 'white')
-    
+  output$actionDescription <- renderUI({
+    cat("\nEntro a la categoria")
+    if(!is.null(input$dataLoading_hover)){
+      taglist(
+        h3("Carga de datos"),
+        textInput("label", "En esta accion puede subir la base de datos como un archivo csv, puede visualizarlos y configurarlos")
+      )
+    }
+    else if (!is.null(input$dataAvailability_hover)){
+      taglist(
+        h3("Limpieza de datos"),
+        textInput("label", "En esta sección puede definir reglas de validacion para limpiar los datos de la base de datos")
+      )
+    }
+    else if(!is.null(input$dataAnalysis_hover)){
+      taglist(
+        h3("Analysis de datos"),
+        textInput("label", "En esta sección puede definir reglas de validacion para limpiar los datos de la base de datos")
+      )
+    }
   })
   
 })

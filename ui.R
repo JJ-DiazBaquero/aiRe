@@ -13,19 +13,23 @@ library(shiny)
 shinyUI(fluidPage(
   
   # Application title
-  titlePanel("Proyecto de calidad de aire"),
-  
-  # Sidebar with a slider input for number of bins 
-  sidebarLayout(
-    sidebarPanel(width = "10%",
-      h3("Seleccione una opción"),
-       actionButton("dataLoading", "Carga de datos", width ="100%"),
-       actionButton("dataAvailability", "Analizar disponibilidad de datos",width="100%")
+  fluidRow(
+    column(12,
+           titlePanel("Proyecto de calidad de aire")
+    )
+  ),
+  fluidRow(
+    column(4,
+           h3("Acciones"),
+           hr(),
+           actionButton("dataLoading_btn", "Carga de datos", width ="80%", hover="dataLoading_hover"),
+           actionButton("dataAvailability_btn", "Limpieza de datos",width="80%", hover = "dataAvailability_hover"),
+           actionButton("dataAnalysis_btn", "Análisis de datos",width="80%", hover = "dataAnalysis_hover"),
+           actionButton("reports_btn", "Reportes",width="80%", hover = "reports_hover"),
+           actionButton("dashboard_btn", "Cuadro de control",width="80%", hover = "dashboard_hover")
     ),
-    # Show a plot of the generated distribution
-    mainPanel(
-       plotOutput("distPlot")
+    column(8,
+           uiOutput("actionDescription")
     )
   )
 ))
-  
