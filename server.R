@@ -8,16 +8,19 @@
 #
 
 library(shiny)
+source("modules/functionDescription.R")
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
   
+  descriptionController <- callModule(description, "functionDescription")
+  
   yolo <- reactive({
-    cat("El hover",input$dataLoading_hover)
+    cat("El hover",input$plot_hover)
   })
   
   output$actionDescription <- renderUI({
-    cat("\nEntro a la categoria")
+    cat(paste("\nEntro a la categoria ", "hover: ", input$plot_hover))
     if(!is.null(input$dataLoading_hover)){
       taglist(
         h3("Carga de datos"),

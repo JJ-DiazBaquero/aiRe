@@ -8,6 +8,7 @@
 #
 
 library(shiny)
+source("modules/functionDescription.R")
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
@@ -18,18 +19,25 @@ shinyUI(fluidPage(
            titlePanel("Proyecto de calidad de aire")
     )
   ),
+  hr(),
   fluidRow(
     column(4,
            h3("Acciones"),
            hr(),
            actionButton("dataLoading_btn", "Carga de datos", width ="80%", hover="dataLoading_hover"),
+           hr(),
            actionButton("dataAvailability_btn", "Limpieza de datos",width="80%", hover = "dataAvailability_hover"),
+           hr(),
            actionButton("dataAnalysis_btn", "Análisis de datos",width="80%", hover = "dataAnalysis_hover"),
+           hr(),
            actionButton("reports_btn", "Reportes",width="80%", hover = "reports_hover"),
+           hr(),
            actionButton("dashboard_btn", "Cuadro de control",width="80%", hover = "dashboard_hover")
     ),
     column(8,
-           uiOutput("actionDescription")
+           h3("Descripción de las acciones"),
+           uiOutput("actionDescription"),
+           descriptionUI("functionDescription")
     )
   )
 ))
