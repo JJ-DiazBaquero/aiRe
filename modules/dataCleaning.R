@@ -20,18 +20,26 @@ dataCleaningUI <- function(id){
       
     ),
     mainPanel(
-      uiOutput(ns("summary"))
+      tableOutput(ns("summary")),
+      textOutput(ns("test"))
     )
   )
 }
 
-# dataBasePM2.5 = read.csv("PM2.5_1998_2014_Encsv.csv", sep=";", row.names=NULL, stringsAsFactors=TRUE)
+database = read.csv("databases/PM2.5_1998_2014_Encsv.csv", sep=";", row.names=NULL, stringsAsFactors=TRUE)
 dataCleaning <- function(input, output, session){
-  datasetToUse <- reactive({
+  rulesSummary = matrix()
+  
+  yolo <- reactive({
+    input$generalRules
     
   })
   
-  output$summary <- renderUI({
-    
+  output$test <-renderPrint({
+    cat(input$generalRules)
+    yolo
+  })
+  output$summary <- renderText({
+    rulesSummary
   })
 }
