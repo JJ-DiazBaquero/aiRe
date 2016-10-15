@@ -9,13 +9,16 @@
 
 library(shiny)
 source("modules/functionDescription.R")
+source("modules/dataLoading.R")
 source("modules/dataCleaning.R")
+
 
 # Define UI for application that draws a histogram
 shinyUI(navbarPage("Proyecto de calidad de aire",inverse = T,
   tabPanel("Descripción",
            descriptionUI("functionDescription")),
-  tabPanel("Carga de datos"),
+  tabPanel("Carga de datos",
+            dataLoadingUI("dataLoading")),
   tabPanel("Limpieza de datos",
            dataCleaningUI("dataCleaning")),
   tabPanel("Análisis de datos"),
