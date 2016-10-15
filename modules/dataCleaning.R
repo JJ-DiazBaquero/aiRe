@@ -20,26 +20,28 @@ dataCleaningUI <- function(id){
       
     ),
     mainPanel(
-      tableOutput(ns("summary")),
+      dataTableOutput(ns("summary")),
       textOutput(ns("test"))
     )
   )
 }
 
-database = read.csv("databases/PM2.5_1998_2014_Encsv.csv", sep=";", row.names=NULL, stringsAsFactors=TRUE)
-dataCleaning <- function(input, output, session){
-  rulesSummary = matrix()
+dataCleaning <- function(input, output, session, database){
   
-  yolo <- reactive({
-    input$generalRules
-    
+  database <- reactive({
+    if(1 %in% input$generalRules ){
+      for(i in 2:12){
+        database[,i] = as.numeric(database[,i])
+      }
+      database[ !is.numeric(database)] == 0
+      
+    }
   })
   
   output$test <-renderPrint({
-    cat(input$generalRules)
-    yolo
-  })
-  output$summary <- renderText({
     rulesSummary
+  })
+  output$summary = renderDataTable({
+    database
   })
 }

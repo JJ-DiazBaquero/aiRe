@@ -9,11 +9,15 @@
 
 library(shiny)
 source("modules/functionDescription.R")
+source("modules/dataLoading.R")
+source("modules/dataCleaning.R")
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
-  
   descriptionController <- callModule(description, "functionDescription")
+  loadingController <- callModule(dataLoading, "dataLoading")
+  database = loadingController
+  controllerCleaning <- callModule(dataCleaning, "dataCleaning", database = database)
   
   yolo <- reactive({
     cat("El hover",input$plot_hover)
