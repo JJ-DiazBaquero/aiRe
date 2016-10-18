@@ -44,5 +44,4 @@ shinyServer(function(input, output) {
       )
     }
   })
-  
 })

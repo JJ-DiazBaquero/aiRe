@@ -1,4 +1,5 @@
 library(shiny)
+library(plyr)
 dataCleaningUI <- function(id){
   ns <- NS(id) 
   titlePanel("Limpieza de datos")
@@ -20,28 +21,41 @@ dataCleaningUI <- function(id){
       
     ),
     mainPanel(
-      dataTableOutput(ns("summary")),
-      textOutput(ns("test"))
+      tableOutput(ns("rulesTable")),
+      verbatimTextOutput(ns("summary")),
+      textOutput(ns("prueba"))
     )
   )
 }
 
 dataCleaning <- function(input, output, session, database){
-  
-  database <- reactive({
-    if(1 %in% input$generalRules ){
+  rulesSummarydf = data.frame(Estaciones = colnames(database)[2:12])
+  for(i in 1:6){
+    rulesSummarydf[paste("Regla ",i)] = rep(0,11)
+  }
+  rulesSummary <- reactiveValues(data = rulesSummarydf)
+  output$prueba <- renderText({
+    return(1 %in% input$generalRules)
+  })
+  cleanData <- reactive({
+    cat(file=stderr(),"cambia valor reglas generales")
+    rules = input$generalRules
+    if(1 %in% rules){
+      #Encontrar todos los valores de string diferentes en la columna para asi quedar con solo números
       for(i in 2:12){
+        lvlsStr = levels(database[,i])
+        lvlsInt = as.numeric(lvlsStr)
+        strList = lvlsStr[is.na(lvlsInt)]
+        database[ database %in% strList] == 0
         database[,i] = as.numeric(database[,i])
+        cat("cambiando columna ", i)
+        
       }
-      database[ !is.numeric(database)] == 0
-      
     }
   })
-  
-  output$test <-renderPrint({
-    rulesSummary
-  })
-  output$summary = renderDataTable({
-    database
+  output$rulesTable <-renderTable(
+    rulesSummary$data, striped = TRUE)
+  output$summary = renderPrint({
+    summary(database[,2:12])
   })
 }
