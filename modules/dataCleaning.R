@@ -43,27 +43,10 @@ dataCleaning <- function(input, output, session, database){
   output$prueba <- renderText({
     return(1 %in% input$generalRules)
   })
-  cleanData <- reactive({
-    input$applyRulesBtn
-    if(1 %in% input$generalRules){
-      #Encontrar todos los valores de string diferentes en la columna para asi quedar con solo números
-      for(i in 2:length(database)){
-        lvlsStr = levels(database[,i])
-        lvlsInt = as.numeric(lvlsStr)
-        strList = lvlsStr[is.na(lvlsInt)]
-        rulesSummary$rulesMatrix[database[,i] %in% strList] == 1
-        database[database[,i] %in% strList] == 0
-        database[,i] = as.numeric(database[,i])
-        cat("cambiando columna ", i)
-      }
-      rulesSummary$data[1,] = colSums(rulesSummary$rulesMatrix)
-      rulesSummary$data[,8] = rulesSummary$data[,8]- rulesSummary$data[,2]
-    }
-  })
+  
   output$rulesTable <-renderTable({
-    
     input$applyRulesBtn
-    if(1 %in% input$generalRules){
+    if(1 %in% isolate(input$generalRules)){
       #Encontrar todos los valores de string diferentes en la columna para asi quedar con solo números
       rule1Array = c(rep(0,nrow(database)))
       for(i in 2:length(database)){
@@ -82,8 +65,10 @@ dataCleaning <- function(input, output, session, database){
       cat("Suma de columnas: \n")
       cat(colSums(rulesSummary$rulesMatrix))
     }
-    
-    return(rulesSummary$data)}, striped = TRUE)
+    rulesSummary$data[,8] <- rulesSummary$data[,8] - rulesSummary$data[,2]
+    return(rulesSummary$data)},
+    striped = TRUE)
+  
   output$summary = renderPrint({
     summary(database[,2:12])
   })
