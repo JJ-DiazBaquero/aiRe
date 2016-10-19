@@ -1,5 +1,5 @@
 library(shiny)
-library(plyr)
+library(plotly)
 dataCleaningUI <- function(id){
   ns <- NS(id) 
   titlePanel("Limpieza de datos")
@@ -23,6 +23,7 @@ dataCleaningUI <- function(id){
       actionButton(ns("applyRulesBtn"), "Aplicar reglas")
     ),
     mainPanel(
+      plotlyOutput(ns("plot")),
       tableOutput(ns("rulesTable")),
       verbatimTextOutput(ns("summary")),
       textOutput(ns("prueba"))
@@ -35,6 +36,7 @@ dataCleaning <- function(input, output, session, database){
   for(i in 1:6){
     rulesSummarydf[paste("Regla ",i)] = rep(0,11)
   }
+  rulesSummarydf["Datos validos"] = rep(1,11)
   rulesSummary <- reactiveValues(data = rulesSummarydf, 
                                  rulesMatrix = matrix(0,nrow = nrow(database), 
                                                 ncol=length(database)-1))
@@ -55,6 +57,7 @@ dataCleaning <- function(input, output, session, database){
         cat("cambiando columna ", i)
       }
       rulesSummary$data[1,] = colSums(rulesSummary$rulesMatrix)
+      rulesSummary$data[,8] = rulesSummary$data[,8]- rulesSummary$data[,2]
     }
   })
   output$rulesTable <-renderTable({
@@ -72,7 +75,7 @@ dataCleaning <- function(input, output, session, database){
         database[database[,i] %in% strList,] = 0
         cat("cambiando columna ", i, "\n")
         cat("Numero de entradas con string ", sum(rule1Array), "\n")
-        rulesSummary$data[i-1,2] = sum(rule1Array)/nrow(lel)
+        rulesSummary$data[i-1,2] = sum(rule1Array)/nrow(database)
         rulesSummary$rulesMatrix[,i-1] = rule1Array
         rule1Array[TRUE]=0
       }
@@ -83,5 +86,11 @@ dataCleaning <- function(input, output, session, database){
     return(rulesSummary$data)}, striped = TRUE)
   output$summary = renderPrint({
     summary(database[,2:12])
+  })
+  
+  output$plot <- renderPlotly({
+    plotRules = plot_ly(x = rulesSummary$data[,1], y = rulesSummary$data[,8], name = "Total validos",type = "bar")
+    Positive <- add_trace(plotRules , x = rulesSummary$data[,1], y = rulesSummary$data[,2], name = "Rule 1", type = "bar")
+    layout <- layout(Positive, barmode = "stack")
   })
 }
