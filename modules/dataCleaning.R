@@ -48,6 +48,7 @@ dataCleaning <- function(input, output, session, database){
     input$applyRulesBtn
     if(1 %in% isolate(input$generalRules)){
       #Encontrar todos los valores de string diferentes en la columna para asi quedar con solo números
+      cat("Aplicando regla 1")
       rule1Array = c(rep(0,nrow(database)))
       for(i in 2:length(database)){
         lvlsStr = levels(database[,i])
@@ -55,17 +56,33 @@ dataCleaning <- function(input, output, session, database){
         strList = lvlsStr[is.na(lvlsInt)]
         rule1Array[database[,i] %in% strList] = 1
         database[,i] = as.numeric(database[,i])
-        database[database[,i] %in% strList,] = 0
+        database[rule1Array == 1,i] = 0
         cat("cambiando columna ", i, "\n")
         cat("Numero de entradas con string ", sum(rule1Array), "\n")
         rulesSummary$data[i-1,2] = sum(rule1Array)/nrow(database)
+        rulesSummary$data[i-1,8] = isolate(1- sum(rulesSummary$data[i-1,2:7]))
         rulesSummary$rulesMatrix[,i-1] = rule1Array
         rule1Array[TRUE]=0
       }
       cat("Suma de columnas: \n")
       cat(colSums(rulesSummary$rulesMatrix))
+    } 
+    if(2 %in% isolate(input$generalRules)){
+      cat("Aplicando regla 2 \n")
+      #Quitar todos los 0's o negativos
+      rule2Array = c(rep(0,nrow(database)))
+      for(i in 2:length(database)){
+        rule2Array[database[,i] <= 0] = 1
+        database[rule2Array == 1,i] = NA
+        rulesSummary$data[i-1,3] = sum(rule2Array)/nrow(database)
+        rulesSummary$data[i-1,8] = isolate(1- sum(rulesSummary$data[i-1,2:7]))
+        rulesSummary$rulesMatrix[,i-1] = rule2Array
+        
+        cat("Regla 2 columna ",i, "\n")
+        cat("Numero de entradas con string ", sum(rule2Array), "\n")
+        rule2Array[TRUE] = 0
+      }
     }
-    rulesSummary$data[,8] <- rulesSummary$data[,8] - rulesSummary$data[,2]
     return(rulesSummary$data)},
     striped = TRUE)
   
@@ -74,8 +91,9 @@ dataCleaning <- function(input, output, session, database){
   })
   
   output$plot <- renderPlotly({
-    plotRules = plot_ly(x = rulesSummary$data[,1], y = rulesSummary$data[,8], name = "Total validos",type = "bar")
-    Positive <- add_trace(plotRules , x = rulesSummary$data[,1], y = rulesSummary$data[,2], name = "Rule 1", type = "bar")
-    layout <- layout(Positive, barmode = "stack")
+    plotRules = plot_ly(x = rulesSummary$data[,1], y = rulesSummary$data[,8], name = "Porcentaje validos",type = "bar")
+    rule1 <- add_trace(plotRules , x = rulesSummary$data[,1], y = rulesSummary$data[,2], name = "Rule 1", type = "bar")
+    rule2 <- add_trace(rule1 , x = rulesSummary$data[,1], y = rulesSummary$data[,3], name = "Rule 2", type = "bar")
+    layout <- layout(rule2, barmode = "stack")
   })
 }
