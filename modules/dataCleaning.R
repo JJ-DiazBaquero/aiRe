@@ -32,35 +32,37 @@ dataCleaningUI <- function(id){
 }
 
 dataCleaning <- function(input, output, session, database){
-  rulesSummarydf = data.frame(Estaciones = colnames(database)[2:12])
+  rulesSummarydf = isolate(data.frame(Estaciones = colnames(database[['data']])[2:12]))
   for(i in 1:6){
     rulesSummarydf[paste("Regla ",i)] = rep(0,11)
   }
   rulesSummarydf["Datos validos"] = rep(1,11)
   rulesSummary <- reactiveValues(data = rulesSummarydf, 
-                                 rulesMatrix = matrix(0,nrow = nrow(database), 
-                                                ncol=length(database)-1))
+                                 rulesMatrix = matrix(0,nrow = isolate(nrow(database[['data']])), 
+                                                ncol=isolate(length(database[['data']])-1)))
   output$prueba <- renderText({
     return(1 %in% input$generalRules)
   })
   
-  output$rulesTable <-renderTable({
+  rulesData <- observe({
     input$applyRulesBtn
+    isolate({
     if(1 %in% isolate(input$generalRules)){
       #Encontrar todos los valores de string diferentes en la columna para asi quedar con solo números
-      cat("Aplicando regla 1")
-      rule1Array = c(rep(0,nrow(database)))
-      for(i in 2:length(database)){
-        lvlsStr = levels(database[,i])
-        lvlsInt = as.numeric(lvlsStr)
+      cat("Aplicando regla 1 \n")
+      #cat(summary(database))
+      rule1Array = c(rep(0,nrow(database[['data']])))
+      for(i in 2:length(database[['data']])){
+        lvlsStr = levels(database[['data']][,i])
+        lvlsInt = as.double(gsub(",",".",lvlsStr))
         strList = lvlsStr[is.na(lvlsInt)]
-        rule1Array[database[,i] %in% strList] = 1
-        database[,i] = as.numeric(database[,i])
-        database[rule1Array == 1,i] = 0
-        cat("cambiando columna ", i, "\n")
-        cat("Numero de entradas con string ", sum(rule1Array), "\n")
-        rulesSummary$data[i-1,2] = sum(rule1Array)/nrow(database)
-        rulesSummary$data[i-1,8] = isolate(1- sum(rulesSummary$data[i-1,2:7]))
+        rule1Array[database[['data']][,i] %in% strList] = 1
+        database[['data']][rule1Array == 1,i] = NA
+        database[['data']][,i] = as.numeric(gsub(",",".",database[['data']][,i]))
+        #cat("cambiando columna ", i, "\n")
+        #cat("Numero de entradas con string ", sum(rule1Array), "\n")
+        rulesSummary$data[i-1,2] = sum(rule1Array)/nrow(database[['data']])
+        rulesSummary$data[i-1,8] = 1- sum(rulesSummary$data[i-1,2:7])
         rulesSummary$rulesMatrix[,i-1] = rule1Array
         rule1Array[TRUE]=0
       }
@@ -68,32 +70,43 @@ dataCleaning <- function(input, output, session, database){
       cat(colSums(rulesSummary$rulesMatrix))
     } 
     if(2 %in% isolate(input$generalRules)){
-      cat("Aplicando regla 2 \n")
+      cat("\n Aplicando regla 2 \n")
+      #cat(summary(database))
       #Quitar todos los 0's o negativos
-      rule2Array = c(rep(0,nrow(database)))
-      for(i in 2:length(database)){
-        rule2Array[database[,i] <= 0] = 1
-        database[rule2Array == 1,i] = NA
-        rulesSummary$data[i-1,3] = sum(rule2Array)/nrow(database)
-        rulesSummary$data[i-1,8] = isolate(1- sum(rulesSummary$data[i-1,2:7]))
+      rule2Array = c(rep(0,nrow(database[['data']])))
+      for(i in 2:length(database[['data']])){
+        rule2Array[database[['data']][,i] <= 0] = 1
+        database[['data']][rule2Array == 1,i] = NA
+        rulesSummary$data[i-1,3] = sum(rule2Array)/nrow(database[['data']])
+        rulesSummary$data[i-1,8] = 1- sum(rulesSummary$data[i-1,2:7])
         rulesSummary$rulesMatrix[,i-1] = rule2Array
         
-        cat("Regla 2 columna ",i, "\n")
-        cat("Numero de entradas con string ", sum(rule2Array), "\n")
+        #cat("Regla 2 columna ",i, "\n")
+        #cat("Numero de entradas con string ", sum(rule2Array), "\n")
         rule2Array[TRUE] = 0
       }
+      cat("Suma de columnas: \n")
+      cat(colSums(rulesSummary$rulesMatrix), "\n")
     }
+    })
+  })
+  
+  output$rulesTable <-renderTable({
+    database[['data']]
     return(rulesSummary$data)},
     striped = TRUE)
   
   output$summary = renderPrint({
-    summary(database[,2:12])
+    summary(database[['data']][,2:12])
   })
   
   output$plot <- renderPlotly({
+    database[['data']]
     plotRules = plot_ly(x = rulesSummary$data[,1], y = rulesSummary$data[,8], name = "Porcentaje validos",type = "bar")
-    rule1 <- add_trace(plotRules , x = rulesSummary$data[,1], y = rulesSummary$data[,2], name = "Rule 1", type = "bar")
-    rule2 <- add_trace(rule1 , x = rulesSummary$data[,1], y = rulesSummary$data[,3], name = "Rule 2", type = "bar")
-    layout <- layout(rule2, barmode = "stack")
+    rule1 <- add_trace(plotRules , x = rulesSummary$data[,1], y = rulesSummary$data[,2], name = "Regla 1", type = "bar")
+    rule2 <- add_trace(rule1 , x = rulesSummary$data[,1], y = rulesSummary$data[,3], name = "Regla 2", type = "bar")
+    rule3 <- add_trace(rule2 , x = rulesSummary$data[,1], y = rulesSummary$data[,4], name = "Regla 3", type = "bar")
+    rule4 <- add_trace(rule3 , x = rulesSummary$data[,1], y = rulesSummary$data[,5], name = "Regla 4", type = "bar")
+    layout <- layout(rule4, barmode = "stack")
   })
 }
