@@ -9,6 +9,7 @@ dataLoadingUI <- function(id, label = "Data Loading") {
 }
 
 dataLoading <- function(input, output, session) {
+  
   database <- reactiveValues(data = read.csv("databases/PM2.5_1998_2014_Encsv.csv", sep=";", row.names=NULL, stringsAsFactors=TRUE))
   changeDates <- observe({
     isolate({

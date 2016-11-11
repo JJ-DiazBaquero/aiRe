@@ -9,6 +9,9 @@ dataAvailabilityUI <- function(id) {
 dataAvailability <- function(input, output, session, database) {
   dataSummary <- reactiveValues(data = list(), plotData = list())
   calcAvailavility <- observe({
+    progress <- Progress$new(session, min  = 2, max = length(database[['data']]))
+    progress$set(message="Análisis de datos - Matriz de disponibilidad",value =2)
+    on.exit(progress$close())
     database[['data']]
     isolate({
       dataSummary$data = matrix(0,
@@ -18,6 +21,7 @@ dataAvailability <- function(input, output, session, database) {
       dataSummary[['data']][!is.na(database[['data']][2:12])] = 1
       vars = list()
       for (i in 2:length(database[['data']])) {
+        progress$inc(1)
         dataToAvg = data.frame(date = database[['data']][, 1], var = dataSummary$data[,i-1])
         dataAvged = timeAverage(dataToAvg, avg.time = "day", interval = "hour")
         vars$Fecha[length(vars$Fecha):(length(vars$Fecha) + length(dataAvged$date))] = dataAvged$date

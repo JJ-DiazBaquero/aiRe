@@ -15,13 +15,36 @@ source("modules/dataAnalysis.R")
 
 
 # Define server logic required to draw a histogram
-shinyServer(function(input, output) {
-  descriptionController <- callModule(description, "functionDescription")
-  loadingController <- callModule(dataLoading, "dataLoading")
-  controllerCleaning <- callModule(dataCleaning, "dataCleaning", database = loadingController)
-  controllerAnalysis <- callModule(dataAnalysis, "dataAnalysis", database = loadingController)
-  yolo <- reactive({
-    cat("El hover",input$plot_hover)
+
+shinyServer(function(input, output, session) {
+  load <- observe({
+    isolate({
+      progress <- Progress$new(session)
+      on.exit(progress$close())
+      progress$set(message = "Construyendo Aplicación",
+                   detail = "Cargando descripción" ,
+                   value = 0)
+      descriptionController <-
+        callModule(description, "functionDescription")
+      progress$set(message = "Construyendo Aplicación",
+                   detail = "Modulo de carga de datos",
+                   value = 0.25)
+      loadingController <-
+        callModule(dataLoading, "dataLoading")
+      progress$set(message = "Construyendo Aplicación",
+                   detail = "Modulo de limpieza de datos",
+                   value = 0.5)
+      controllerCleaning <-
+        callModule(dataCleaning, "dataCleaning", database = loadingController)
+      progress$set(message = "Construyendo Aplicación",
+                   detail = "Modulo de análisis de datos",
+                   value = 0.75)
+      controllerAnalysis <-
+        callModule(dataAnalysis, "dataAnalysis", database = loadingController)
+      progress$set(message = "Construyendo Aplicación",
+                   detail = "Modulo de análisis de datos",
+                   value = 1)
+    })
   })
   
   output$actionDescription <- renderUI({

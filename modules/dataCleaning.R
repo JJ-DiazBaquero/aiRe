@@ -23,6 +23,7 @@ dataCleaningUI <- function(id){
       actionButton(ns("applyRulesBtn"), "Aplicar reglas")
     ),
     mainPanel(
+      p("El siguiente grafico indica el porcentaje de los datos que pertenecen a la categoria en la derecha"),
       plotlyOutput(ns("plot")),
       tableOutput(ns("rulesTable")),
       verbatimTextOutput(ns("summary")),
@@ -47,7 +48,11 @@ dataCleaning <- function(input, output, session, database){
   rulesData <- observe({
     input$applyRulesBtn
     isolate({
+    progress <- Progress$new(session, min = 0, max = length(input$generalRules))
+    on.exit(progress$close())
+    progress$set(message = "Aplicando reglas", value = 0)
     if(1 %in% isolate(input$generalRules)){
+      progress$set(0, detail="Regla 1")
       #Encontrar todos los valores de string diferentes en la columna para asi quedar con solo números
       cat("Aplicando regla 1 \n")
       #cat(summary(database))
@@ -70,6 +75,7 @@ dataCleaning <- function(input, output, session, database){
       cat(colSums(rulesSummary$rulesMatrix))
     } 
     if(2 %in% isolate(input$generalRules)){
+      progress$inc(1, detail="Regla 2")
       cat("\n Aplicando regla 2 \n")
       #cat(summary(database))
       #Quitar todos los 0's o negativos
@@ -88,6 +94,8 @@ dataCleaning <- function(input, output, session, database){
       cat("Suma de columnas: \n")
       cat(colSums(rulesSummary$rulesMatrix), "\n")
     }
+    
+    progress$inc(1, detail="Regla 3")
     })
   })
   
@@ -107,6 +115,8 @@ dataCleaning <- function(input, output, session, database){
     rule2 <- add_trace(rule1 , x = rulesSummary$data[,1], y = rulesSummary$data[,3], name = "Regla 2", type = "bar")
     rule3 <- add_trace(rule2 , x = rulesSummary$data[,1], y = rulesSummary$data[,4], name = "Regla 3", type = "bar")
     rule4 <- add_trace(rule3 , x = rulesSummary$data[,1], y = rulesSummary$data[,5], name = "Regla 4", type = "bar")
-    layout <- layout(rule4, barmode = "stack")
+    layout <- layout(rule4, barmode = "stack", title = "Porcentaje de datos en cada regla", 
+                     xaxis = list(title = "Estacion", type = "category"), 
+                     yaxis = list(title = "Porcentaje de datos"))
   })
 }
