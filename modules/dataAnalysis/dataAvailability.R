@@ -3,17 +3,18 @@ dataAvailabilityUI <- function(id) {
   ns <- NS(id)
   titlePanel("Disponibilidad de datos")
   fluidPage(title = "Disponibilidad de datos",
+            actionButton(ns("recalculateMatrix"),"Recalcular Matriz"),
             plotlyOutput(ns("heatMap")))
 }
 
 dataAvailability <- function(input, output, session, database) {
   dataSummary <- reactiveValues(data = list(), plotData = list())
   calcAvailavility <- observe({
+    input$recalculateMatrix
+    isolate({
     progress <- Progress$new(session, min  = 2, max = length(database[['data']]))
     progress$set(message="Análisis de datos - Matriz de disponibilidad",value =2)
     on.exit(progress$close())
-    database[['data']]
-    isolate({
       dataSummary$data = matrix(0,
                                 nrow = nrow(database[['data']]),
                                 ncol = length(database[['data']][2:12]))

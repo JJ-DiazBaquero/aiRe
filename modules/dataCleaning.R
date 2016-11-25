@@ -1,5 +1,6 @@
 library(shiny)
 library(plotly)
+library("openair")
 dataCleaningUI <- function(id){
   ns <- NS(id) 
   titlePanel("Limpieza de datos")
@@ -20,7 +21,12 @@ dataCleaningUI <- function(id){
       checkboxGroupInput(ns("densityRules"), label = h3("Reglas de densidad de datos"), 
                          choices = list("Eliminar datos aislados" = 1)
       ),
-      actionButton(ns("applyRulesBtn"), "Aplicar reglas")
+      actionButton(ns("applyRulesBtn"), "Aplicar reglas"),
+      dateRangeInput(ns("dateRange"), 
+                     "Rango de fechas a visualizar", 
+                     language = "es", separator = "a", format = "dd-mm-yyyy",
+                     start = "1998-01-01", end = "2014-12-31", 
+                     min = "1998-01-01", max = "2014-12-31")
     ),
     mainPanel(
       p("El siguiente grafico indica el porcentaje de los datos que pertenecen a la categoria en la derecha"),
@@ -42,7 +48,7 @@ dataCleaning <- function(input, output, session, database){
                                  rulesMatrix = matrix(0,nrow = isolate(nrow(database[['data']])), 
                                                 ncol=isolate(length(database[['data']])-1)))
   output$prueba <- renderText({
-    return(1 %in% input$generalRules)
+    return(input$dateRange)
   })
   
   rulesData <- observe({
@@ -94,7 +100,23 @@ dataCleaning <- function(input, output, session, database){
       cat("Suma de columnas: \n")
       cat(colSums(rulesSummary$rulesMatrix), "\n")
     }
-    
+    if(3 %in% isolate(input$generalRules)){
+      progress$inc(1, detail="Regla 3")
+      cat("\n Aplicando regla 3 \n")
+      #cat(summary(database))
+      #Quitar todos los valores inferiores a 1
+      rule3Array = c(rep(0,nrow(database[['data']])))
+      for(i in 2:length(database[['data']])){
+        rule3Array[database[['data']][,i] <= 1] = 1
+        database[['data']][rule3Array == 1,i] = NA
+        rulesSummary$data[i-1,4] = sum(rule3Array)/nrow(database[['data']])
+        rulesSummary$data[i-1,8] = 1- sum(rulesSummary$data[i-1,2:7])
+        rulesSummary$rulesMatrix[,i-1] = rule3Array
+        rule3Array[TRUE] = 0
+      }
+      cat("Suma de columnas: \n")
+      cat(colSums(rulesSummary$rulesMatrix), "\n")
+    }
     progress$inc(1, detail="Regla 3")
     })
   })
@@ -109,14 +131,29 @@ dataCleaning <- function(input, output, session, database){
   })
   
   output$plot <- renderPlotly({
-    database[['data']]
+    progress <- Progress$new(session)
+    on.exit(progress$close())
+    progress$set(message = "Generando grafico", value = 0)
+    
+    #date1 = as.POSIXlt(input$dateRange[1],format="%d/%m/%Y %H:%M")
+    #date2 = as.POSIXlt(input$dateRange[2],format="%d/%m/%Y %H:%M")
+    #timeInterval = seq.POSIXt(from=date1, to=date2, by="hour")
+    #dataSubset = rulesSummary$rulesMatrix[database[['data']][,1] %in% timeInterval]
+    #database[['data']]
+    
+    #Recalculate matrix of percentage
+    #for(i in 1:nrow(rulesSummary$rulesMatrix)){
+    #  rulesSummary$data[i,] = sum(rulesSummary$rulesMatrix[,i])/nrow(database[['data']][,i+1])
+    #}
+        
     plotRules = plot_ly(x = rulesSummary$data[,1], y = rulesSummary$data[,8], name = "Porcentaje validos",type = "bar")
     rule1 <- add_trace(plotRules , x = rulesSummary$data[,1], y = rulesSummary$data[,2], name = "Regla 1", type = "bar")
     rule2 <- add_trace(rule1 , x = rulesSummary$data[,1], y = rulesSummary$data[,3], name = "Regla 2", type = "bar")
     rule3 <- add_trace(rule2 , x = rulesSummary$data[,1], y = rulesSummary$data[,4], name = "Regla 3", type = "bar")
     rule4 <- add_trace(rule3 , x = rulesSummary$data[,1], y = rulesSummary$data[,5], name = "Regla 4", type = "bar")
+    progress$inc(1)
     layout <- layout(rule4, barmode = "stack", title = "Porcentaje de datos en cada regla", 
-                     xaxis = list(title = "Estacion", type = "category"), 
+                     xaxis = list(title = ""), 
                      yaxis = list(title = "Porcentaje de datos"))
   })
 }
