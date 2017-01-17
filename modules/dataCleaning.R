@@ -39,14 +39,16 @@ dataCleaningUI <- function(id){
 }
 
 dataCleaning <- function(input, output, session, database){
+  
   rulesSummarydf = isolate(data.frame(Estaciones = colnames(database[['data']])[2:12]))
   for(i in 1:6){
     rulesSummarydf[paste("Regla ",i)] = rep(0,11)
   }
   rulesSummarydf["Datos validos"] = rep(1,11)
+  #data is the dataframe with the summary of the data per rule in each station 
+  #rulesMatrix is the 3 dimensional matrix of 1's and 0's if the data is valid, 1st: Rule, 2nd: Station, 3rd: obs
   rulesSummary <- reactiveValues(data = rulesSummarydf, 
-                                 rulesMatrix = matrix(0,nrow = isolate(nrow(database[['data']])), 
-                                                ncol=isolate(length(database[['data']])-1)))
+                                 rulesMatrix = array(0,dim = isolate(c(6,length(database[['data']])-1,nrow(database[['data']])))))
   output$prueba <- renderText({
     return(input$dateRange)
   })
@@ -61,24 +63,20 @@ dataCleaning <- function(input, output, session, database){
       progress$set(0, detail="Regla 1")
       #Encontrar todos los valores de string diferentes en la columna para asi quedar con solo números
       cat("Aplicando regla 1 \n")
-      #cat(summary(database))
       rule1Array = c(rep(0,nrow(database[['data']])))
       for(i in 2:length(database[['data']])){
         lvlsStr = levels(database[['data']][,i])
         lvlsInt = as.double(gsub(",",".",lvlsStr))
         strList = lvlsStr[is.na(lvlsInt)]
-        rule1Array[database[['data']][,i] %in% strList] = 1
+        rule1Array[database[['data']][,i] %in% strList] = TRUE
         database[['data']][rule1Array == 1,i] = NA
         database[['data']][,i] = as.numeric(gsub(",",".",database[['data']][,i]))
-        #cat("cambiando columna ", i, "\n")
-        #cat("Numero de entradas con string ", sum(rule1Array), "\n")
         rulesSummary$data[i-1,2] = sum(rule1Array)/nrow(database[['data']])
         rulesSummary$data[i-1,8] = 1- sum(rulesSummary$data[i-1,2:7])
-        rulesSummary$rulesMatrix[,i-1] = rule1Array
+        rulesSummary$rulesMatrix[1,i-1,] = rule1Array
         rule1Array[TRUE]=0
+        
       }
-      cat("Suma de columnas: \n")
-      cat(colSums(rulesSummary$rulesMatrix))
     } 
     if(2 %in% isolate(input$generalRules)){
       progress$inc(1, detail="Regla 2")
@@ -87,18 +85,14 @@ dataCleaning <- function(input, output, session, database){
       #Quitar todos los 0's o negativos
       rule2Array = c(rep(0,nrow(database[['data']])))
       for(i in 2:length(database[['data']])){
-        rule2Array[database[['data']][,i] <= 0] = 1
+        rule2Array[database[['data']][,i] <= 0] = TRUE
         database[['data']][rule2Array == 1,i] = NA
         rulesSummary$data[i-1,3] = sum(rule2Array)/nrow(database[['data']])
         rulesSummary$data[i-1,8] = 1- sum(rulesSummary$data[i-1,2:7])
-        rulesSummary$rulesMatrix[,i-1] = rule2Array
+        rulesSummary$rulesMatrix[2,i-1,] = rule2Array
         
-        #cat("Regla 2 columna ",i, "\n")
-        #cat("Numero de entradas con string ", sum(rule2Array), "\n")
         rule2Array[TRUE] = 0
       }
-      cat("Suma de columnas: \n")
-      cat(colSums(rulesSummary$rulesMatrix), "\n")
     }
     if(3 %in% isolate(input$generalRules)){
       progress$inc(1, detail="Regla 3")
@@ -107,15 +101,13 @@ dataCleaning <- function(input, output, session, database){
       #Quitar todos los valores inferiores a 1
       rule3Array = c(rep(0,nrow(database[['data']])))
       for(i in 2:length(database[['data']])){
-        rule3Array[database[['data']][,i] <= 1] = 1
+        rule3Array[database[['data']][,i] <= 1] = TRUE
         database[['data']][rule3Array == 1,i] = NA
         rulesSummary$data[i-1,4] = sum(rule3Array)/nrow(database[['data']])
         rulesSummary$data[i-1,8] = 1- sum(rulesSummary$data[i-1,2:7])
-        rulesSummary$rulesMatrix[,i-1] = rule3Array
+        rulesSummary$rulesMatrix[3,i-1,] = rule3Array
         rule3Array[TRUE] = 0
       }
-      cat("Suma de columnas: \n")
-      cat(colSums(rulesSummary$rulesMatrix), "\n")
     }
     progress$inc(1, detail="Regla 3")
     })
@@ -133,19 +125,25 @@ dataCleaning <- function(input, output, session, database){
   output$plot <- renderPlotly({
     progress <- Progress$new(session)
     on.exit(progress$close())
+
     progress$set(message = "Generando grafico", value = 0)
     
-    #date1 = as.POSIXlt(input$dateRange[1],format="%d/%m/%Y %H:%M")
-    #date2 = as.POSIXlt(input$dateRange[2],format="%d/%m/%Y %H:%M")
-    #timeInterval = seq.POSIXt(from=date1, to=date2, by="hour")
-    #dataSubset = rulesSummary$rulesMatrix[database[['data']][,1] %in% timeInterval]
-    #database[['data']]
+    input$dateRange
+    date1 = as.POSIXlt(input$dateRange[1],format="%d/%m/%Y %H:%M")
+    date2 = as.POSIXlt(input$dateRange[2],format="%d/%m/%Y %H:%M")
+    timeInterval = seq.POSIXt(from=date1, to=date2, by="hour")
     
-    #Recalculate matrix of percentage
-    #for(i in 1:nrow(rulesSummary$rulesMatrix)){
-    #  rulesSummary$data[i,] = sum(rulesSummary$rulesMatrix[,i])/nrow(database[['data']][,i+1])
-    #}
-        
+    #to many obs, need to subcript by each rule
+    dataSubset = rulesSummary$rulesMatrix[,,which(database[['data']][,1] %in% timeInterval)]
+    cat("Length of timeInterval")
+    cat(length(which(database[['data']][,1] %in% timeInterval)))
+    database[['data']]
+    #Recalculate matrix of percentage by row (each rule)
+    for(i in 1:6){
+      rulesSummary$data[,i+1] = rowSums(rulesSummary$rulesMatrix[i,,which(database[['data']][,1] %in% timeInterval)])/length(which(database[['data']][,1] %in% timeInterval))
+    }
+    rulesSummary$data[,8] = 1 - rowSums(rulesSummary$data[,2:7])
+    
     plotRules = plot_ly(x = rulesSummary$data[,1], y = rulesSummary$data[,8], name = "Porcentaje validos",type = "bar")
     rule1 <- add_trace(plotRules , x = rulesSummary$data[,1], y = rulesSummary$data[,2], name = "Regla 1", type = "bar")
     rule2 <- add_trace(rule1 , x = rulesSummary$data[,1], y = rulesSummary$data[,3], name = "Regla 2", type = "bar")
