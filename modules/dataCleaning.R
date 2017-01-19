@@ -39,7 +39,6 @@ dataCleaningUI <- function(id){
 }
 
 dataCleaning <- function(input, output, session, database){
-  
   rulesSummarydf = isolate(data.frame(Estaciones = colnames(database[['data']])[2:12]))
   for(i in 1:6){
     rulesSummarydf[paste("Regla ",i)] = rep(0,11)
@@ -47,8 +46,10 @@ dataCleaning <- function(input, output, session, database){
   rulesSummarydf["Datos validos"] = rep(1,11)
   #data is the dataframe with the summary of the data per rule in each station 
   #rulesMatrix is the 3 dimensional matrix of 1's and 0's if the data is valid, 1st: Rule, 2nd: Station, 3rd: obs
+  #rulesApplied is the historic of rules applied
   rulesSummary <- reactiveValues(data = rulesSummarydf, 
-                                 rulesMatrix = array(0,dim = isolate(c(6,length(database[['data']])-1,nrow(database[['data']])))))
+                                 rulesMatrix = array(0,dim = isolate(c(6,length(database[['data']])-1,nrow(database[['data']])))),
+                                 rulesApplied = NULL)
   output$prueba <- renderText({
     return(input$dateRange)
   })
@@ -59,7 +60,7 @@ dataCleaning <- function(input, output, session, database){
     progress <- Progress$new(session, min = 0, max = length(input$generalRules))
     on.exit(progress$close())
     progress$set(message = "Aplicando reglas", value = 0)
-    if(1 %in% isolate(input$generalRules)){
+    if(1 %in% isolate(input$generalRules) && !(1 %in% rulesSummary$rulesApplied)){
       progress$set(0, detail="Regla 1")
       #Encontrar todos los valores de string diferentes en la columna para asi quedar con solo números
       cat("Aplicando regla 1 \n")
@@ -75,10 +76,10 @@ dataCleaning <- function(input, output, session, database){
         rulesSummary$data[i-1,8] = 1- sum(rulesSummary$data[i-1,2:7])
         rulesSummary$rulesMatrix[1,i-1,] = rule1Array
         rule1Array[TRUE]=0
-        
       }
+      rulesSummary$rulesApplied[1] = 1
     } 
-    if(2 %in% isolate(input$generalRules)){
+    if(2 %in% isolate(input$generalRules) && !(2 %in% rulesSummary$rulesApplied)){
       progress$inc(1, detail="Regla 2")
       cat("\n Aplicando regla 2 \n")
       #cat(summary(database))
@@ -93,8 +94,9 @@ dataCleaning <- function(input, output, session, database){
         
         rule2Array[TRUE] = 0
       }
+      rulesSummary$rulesApplied[2] = 2
     }
-    if(3 %in% isolate(input$generalRules)){
+    if(3 %in% isolate(input$generalRules) && !(3 %in% rulesSummary$rulesApplied)){
       progress$inc(1, detail="Regla 3")
       cat("\n Aplicando regla 3 \n")
       #cat(summary(database))
@@ -108,6 +110,7 @@ dataCleaning <- function(input, output, session, database){
         rulesSummary$rulesMatrix[3,i-1,] = rule3Array
         rule3Array[TRUE] = 0
       }
+      rulesSummary$rulesApplied[3] = 3
     }
     progress$inc(1, detail="Regla 3")
     })

@@ -17,6 +17,11 @@ source("modules/dataAnalysis.R")
 # Define server logic required to draw a histogram
 
 shinyServer(function(input, output, session) {
+  
+  cat("lines of code \n")
+  cat(length(readLines("server.R"))+length(readLines("ui.R"))+length(readLines("modules/functionDescription.R"))+
+        length(readLines("modules/dataLoading.R"))+length(readLines("modules/dataCleaning.R"))+length(readLines("modules/dataAnalysis.R")))
+  
   load <- observe({
     isolate({
       progress <- Progress$new(session)
