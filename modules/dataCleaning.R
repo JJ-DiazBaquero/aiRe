@@ -11,15 +11,15 @@ dataCleaningUI <- function(id){
                   selected = 1),
       hr(),
       checkboxGroupInput(ns("generalRules"), label = h3("Reglas generales"), 
-                         choices = list("Restriccion de cadenas de texto" = 1, 
-                                        "Valores negativos y ceros" = 2, 
-                                        "Limite de detección del equipo" = 3)
+                         choices = list("1. Restriccion de cadenas de texto" = 1, 
+                                        "2. Valores negativos y ceros" = 2, 
+                                        "3. Limite de detección del equipo" = 3)
                          ),
       checkboxGroupInput(ns("particularRules"), label = h3("Reglas particulares a PM2.5"), 
-                         choices = list("Asegurar PM10 > PM2.5" = 1)
+                         choices = list("4. Asegurar PM10 > PM2.5" = 1)
       ),
       checkboxGroupInput(ns("densityRules"), label = h3("Reglas de densidad de datos"), 
-                         choices = list("Eliminar datos aislados" = 1)
+                         choices = list("5. Eliminar datos aislados" = 1)
       ),
       actionButton(ns("applyRulesBtn"), "Aplicar reglas"),
       dateRangeInput(ns("dateRange"), 
@@ -54,7 +54,8 @@ dataCleaning <- function(input, output, session, database){
     return(input$dateRange)
   })
   
-  rulesData <- observe({
+  #This method apply the rules that are selected when the user click on button
+  applyRules <- observe({
     input$applyRulesBtn
     isolate({
     progress <- Progress$new(session, min = 0, max = length(input$generalRules))
@@ -153,7 +154,7 @@ dataCleaning <- function(input, output, session, database){
     rule3 <- add_trace(rule2 , x = rulesSummary$data[,1], y = rulesSummary$data[,4], name = "Regla 3", type = "bar")
     rule4 <- add_trace(rule3 , x = rulesSummary$data[,1], y = rulesSummary$data[,5], name = "Regla 4", type = "bar")
     progress$inc(1)
-    layout <- layout(rule4, barmode = "stack", title = "Porcentaje de datos en cada regla", 
+    layout <- layout(rule4, barmode = "stack", title = paste("Porcentaje de datos en cada regla entre",input$dateRange[1],"y",input$dateRange[2]), 
                      xaxis = list(title = ""), 
                      yaxis = list(title = "Porcentaje de datos"))
   })
