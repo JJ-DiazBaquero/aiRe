@@ -1,4 +1,5 @@
 source("modules/dataAnalysis/dataAvailability.R")
+source("modules/dataAnalysis/comparativeAnalysis.R")
 
 dataAnalysisUI <- function(id) {
   ns <- NS(id)
@@ -6,7 +7,8 @@ dataAnalysisUI <- function(id) {
     "Herramientas de analisis de datos",
     tabPanel("Disponibilidad de datos",
              dataAvailabilityUI(ns("dataAvailability"))),
-    tabPanel("Analisis temporales (*)"),
+    tabPanel("Analisis comparativos",
+             comparativeAnalysisUI(ns("comparativeAnalysis"))),
     tabPanel("Pronosticos (*)")
   )
 }
