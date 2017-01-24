@@ -14,5 +14,7 @@ dataAnalysisUI <- function(id) {
 }
 dataAnalysis <- function(input, output, session, database){
   controllerAvailability <- callModule(dataAvailability, "dataAvailability", database = database)
+  controllerComparativeAnalysis <- callModule(comparativeAnalysis, "comparativeAnalysis", database = database)
+  
 }
   
