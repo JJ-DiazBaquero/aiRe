@@ -1,0 +1,8 @@
+Que falta del software:
+- Hacer busqueda por dia de la semana X
+- Unir intervalos de tiempo (ej. mismos meses de varios años) X
+- Incluir dias de la semana X
+- Seleccionar en las graficas la estacion que se desea mostrar
+- Mostrar mas graficas
+- Incluir los otros 2 rangos de fechas
+- Arreglar que no detecta las tildes (dias de la semana)
