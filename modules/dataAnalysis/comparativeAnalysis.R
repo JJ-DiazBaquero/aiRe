@@ -6,6 +6,7 @@ comparativeAnalysisUI <- function(id) {
              fluidRow(
                column(4,
              h3("Rango de fechas 1"),
+             textInput(ns("nameRange1"), "Agregar Nombre"),
              sliderInput(ns("rangeYear1"), "Anios:",
                          min = 1998, max = 2014, value = c(1998,2014)),
              sliderInput(ns("rangeMonth1"), "Mes:",
@@ -20,6 +21,7 @@ comparativeAnalysisUI <- function(id) {
               ),
              column(4,
                     h3("Rango de fechas 2"),
+                    textInput(ns("nameRange2"), "Agregar Nombre"),
                     sliderInput(ns("rangeYear2"), "Anios:",
                                 min = 1998, max = 2014, value = c(1998,2014)),
                     sliderInput(ns("rangeMonth2"), "Mes:",
@@ -34,6 +36,7 @@ comparativeAnalysisUI <- function(id) {
              ),
              column(4,
                     h3("Rango de fechas 3"),
+                    textInput(ns("nameRange3"), "Agregar Nombre"),
                     sliderInput(ns("rangeYear3"), "Anios:",
                                 min = 1998, max = 2014, value = c(1998,2014)),
                     sliderInput(ns("rangeMonth3"), "Mes:",
@@ -116,33 +119,39 @@ comparativeAnalysis <- function(input, output, session, database) {
   
   calcAvailavility<- observe({
     input$makeGraphs
+    browser()
     isolate({
       data = list()
       if(input$use1 == TRUE){
+        #The user chooses by number of the day
         if(input$typeOfWeek1 == 1){
+          cat("Processing Interval 1","\n")
           date1 = as.POSIXlt(paste(input$rangeDay1[1],"/",input$rangeMonth1[1],"/",input$rangeYear1[1]," ",input$rangeHour1[1],":00", sep = ""),
                              format="%d/%m/%Y %H:%M")
           date2 = as.POSIXlt(paste(input$rangeDay1[2],"/",input$rangeMonth1[2],"/",input$rangeYear1[2]," ",input$rangeHour1[2],":00", sep = ""),
                              format="%d/%m/%Y %H:%M")
           timeInterval = seq.POSIXt(from=date1, to=date2, by="hour")
-          reactiveData$intervalData[1] = database[['data']][which(database[['data']][,1] %in% timeInterval),]
+          reactiveData$intervalData[[1]] = database[['data']][which(database[['data']][,1] %in% timeInterval),]
+          cat("End Interval 1","\n")
+        }
+        #The user chooses by weekday
+        if(input$typeOfWeek1 == 0){
+        
         }
       }
-      
-      output$boxplot <- renderPlotly({
-        p = NULL
-        browser()
-        for(i in reactiveData$intervalData){
-          if(is.null(p)){
-            p = plot_ly(y = i[,2], type = "box")
-          }
-          else{
-            p <- add_trace(p, y = i[,2], type = "box")
-          }
-        }
-      })
-      
     })
+  })
+  
+  output$boxplot <- renderPlotly({
+    p = plot_ly(type = "box")
+    for(i in 1:3){
+      cat("evaluation of ")
+      if(input[[paste("use",i,sep="")]] == TRUE){
+        #The parameter evaluation = TRUE allows to indexing the same array
+        p <- add_trace(p, y = reactiveData$intervalData[[i]][,2], type = "box", name = input[[paste("nameRange",i,sep="")]], evaluate = TRUE)
+      }
+    }
+    p
   })
   
 }
