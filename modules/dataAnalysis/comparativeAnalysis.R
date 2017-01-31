@@ -51,7 +51,10 @@ comparativeAnalysisUI <- function(id) {
              )),
              fluidRow(actionButton(ns("makeGraphs"),"Enviar cambios"))
              ),
-    tabPanel("Graficos",plotlyOutput(ns("boxplot")))
+    tabPanel("Graficos",
+             fluidRow(
+             uiOutput(ns("stationsUI"))),
+             plotlyOutput(ns("boxplot")))
   )
 }
 
@@ -117,6 +120,14 @@ comparativeAnalysis <- function(input, output, session, database) {
     }
   })
   
+  output$stationsUI <- renderUI({
+    checkboxGroupInput(ns("stations"), "Estaciones a visualizar",
+                       choices = colnames(database[['data']])[-1],
+                       selected = colnames(database[['data']])[-1],
+                       inline = TRUE
+    )
+  })
+  
   calcAvailavility<- observe({
     input$makeGraphs
     isolate({
@@ -160,10 +171,11 @@ comparativeAnalysis <- function(input, output, session, database) {
   output$boxplot <- renderPlotly({
     p = plot_ly(type = "box")
     for(i in 1:3){
-      cat("evaluation of ")
-      if(input[[paste("use",i,sep="")]] == TRUE){
-        #The parameter evaluation = TRUE allows to indexing the same array
-        p <- add_trace(p, y = reactiveData$intervalData[[i]][,2], type = "box", name = input[[paste("nameRange",i,sep="")]], evaluate = TRUE)
+      for(station in input$stations){
+        if(input[[paste("use",i,sep="")]] == TRUE){
+          #The parameter evaluation = TRUE allows to indexing the same array
+          p <- add_trace(p, y = reactiveData$intervalData[[i]][[station]], type = "box", name = input[[paste("nameRange",i,sep="")]], evaluate = TRUE)
+        }
       }
     }
     p
