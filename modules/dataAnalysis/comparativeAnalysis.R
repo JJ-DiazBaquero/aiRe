@@ -49,11 +49,10 @@ comparativeAnalysisUI <- function(id) {
                                 min = 0, max = 23, value = c(0,23)),
                     checkboxInput(ns("use3"),"Usar rango 3", FALSE)
              )),
-             fluidRow(actionButton(ns("makeGraphs"),"Enviar cambios"))
+             fluidRow(actionButton(ns("makeGraphs"),"Enviar cambios")),
+             fluidRow(uiOutput(ns("stationsUI")))
              ),
     tabPanel("Graficos",
-             fluidRow(
-             uiOutput(ns("stationsUI"))),
              plotlyOutput(ns("boxplot")))
   )
 }
@@ -169,15 +168,17 @@ comparativeAnalysis <- function(input, output, session, database) {
   })
   
   output$boxplot <- renderPlotly({
-    p = plot_ly(type = "box")
+    p = plot_ly(x = input$stations, type = "box", visible = FALSE)
+    browser()
     for(i in 1:3){
-      for(station in input$stations){
-        if(input[[paste("use",i,sep="")]] == TRUE){
-          #The parameter evaluation = TRUE allows to indexing the same array
-          p <- add_trace(p, y = reactiveData$intervalData[[i]][[station]], type = "box", name = input[[paste("nameRange",i,sep="")]], evaluate = TRUE)
-        }
+      if(input[[paste("use",i,sep="")]] == TRUE){
+        info = reactiveData$intervalData[[i]]
+        info = stack(info, select = input$stations)
+        p = add_trace(p, y = info$values, x = info$ind, 
+                      name = input[[paste("nameRange",i,sep="")]], visible = TRUE)
       }
     }
+    p = layout(p,boxmode = "group")
     p
   })
   
