@@ -169,7 +169,6 @@ comparativeAnalysis <- function(input, output, session, database) {
   
   output$boxplot <- renderPlotly({
     p = plot_ly(x = input$stations, type = "box", visible = FALSE)
-    browser()
     for(i in 1:3){
       if(input[[paste("use",i,sep="")]] == TRUE){
         info = reactiveData$intervalData[[i]]
