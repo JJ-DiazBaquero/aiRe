@@ -67,10 +67,10 @@ comparativeAnalysis <- function(input, output, session, database) {
       checkboxGroupInput(ns("rangeDay1"), "Dias de la semana:",
                          choices = c("L" = "lunes",
                                      "M" = "martes",
-                                     "M" = "miércoles",
-                                     "J" = "Thursday",
+                                     "M" = "miercoles",
+                                     "J" = "jueves",
                                      "V" = "viernes",
-                                     "S" = "sábado",
+                                     "S" = "sabado",
                                      "D" = "domingo"),
                          inline = TRUE
       )
@@ -84,13 +84,13 @@ comparativeAnalysis <- function(input, output, session, database) {
   output$weekui2 <- renderUI({
     if(input$typeOfWeek2 == 0){
       checkboxGroupInput(ns("rangeDay2"), "Dias de la semana:",
-                         choices = c("L" = "Monday",
-                                     "M" = "Tuesday",
-                                     "M" = "Wednesday",
-                                     "J" = "Thursday",
-                                     "V" = "Friday",
-                                     "S" = "Saturday",
-                                     "D" = "Sunday"),
+                         choices = c("L" = "lunes",
+                                     "M" = "martes",
+                                     "M" = "miercoles",
+                                     "J" = "jueves",
+                                     "V" = "viernes",
+                                     "S" = "sabado",
+                                     "D" = "domingo"),
                          inline = TRUE
       )
     }
@@ -103,13 +103,13 @@ comparativeAnalysis <- function(input, output, session, database) {
   output$weekui3 <- renderUI({
     if(input$typeOfWeek3 == 0){
       checkboxGroupInput(ns("rangeDay3"), "Dias de la semana:",
-                         choices = c("L" = "Monday",
-                                     "M" = "Tuesday",
-                                     "M" = "Wednesday",
-                                     "J" = "Thursday",
-                                     "V" = "Friday",
-                                     "S" = "Saturday",
-                                     "D" = "Sunday"),
+                         choices = c("L" = "lunes",
+                                     "M" = "martes",
+                                     "M" = "miercoles",
+                                     "J" = "jueves",
+                                     "V" = "viernes",
+                                     "S" = "sabado",
+                                     "D" = "domingo"),
                          inline = TRUE
       )
     }
@@ -131,38 +131,42 @@ comparativeAnalysis <- function(input, output, session, database) {
     input$makeGraphs
     isolate({
       data = list()
-      if(input$use1 == TRUE){
-        #The user chooses by number of the day
-        if(input$typeOfWeek1 == 1){
-          #get Number of day
-          days = seq(from = input$rangeDay1[1], to = input$rangeDay1[2])
-          dates = data.frame(date = database[['data']][,1])
-          dates$day = as.numeric(format(dates$date, "%d"))
-          dates = dates[dates$day %in% input$rangeDay1,]
+      for(i in 1:3){
+        if(input[[paste("use",i,sep="")]] == TRUE){
+          #The user chooses by number of the day
+          if(input[[paste("typeOfWeek",i,sep="")]] == 1){
+            #get Number of day
+            days = seq(from = input[[paste("rangeDay",i,sep="")]][1], to = input[[paste("rangeDay",i,sep="")]][2])
+            dates = data.frame(date = database[['data']][,1])
+            dates$day = as.numeric(format(dates$date, "%d"))
+            dates = dates[dates$day %in% input[[paste("rangeDay",i,sep="")]],]
+          }
+          #The user chooses by weekday
+          if(input[[paste("typeOfWeek",i,sep="")]] == 0){
+            #get weekdays selected by user
+            #The functionality of this change on the language of the machine (originally done in spanish)
+            dates = data.frame(date = database[['data']][,1])
+            dates = cutData(dates, type = "weekday", start.day = 1)
+            dates$weekday = iconv(dates$weekday,to="ASCII//TRANSLIT")
+            dates = dates[dates$weekday %in% input[[paste("rangeDay",i,sep="")]],]
+          }
+          
+          #Get the hours of interest (the +1 is for the numeric transformation of openAir factor hour)
+          hours = seq(from = input[[paste("rangeHour",i,sep="")]][1]+1, to = input[[paste("rangeHour",i,sep="")]][2]+1)
+          dates = cutData(dates, type = "hour")
+          dates = dates[as.numeric(dates$hour) %in% hours,]
+          
+          #Get the months of interest
+          months = seq(from = input[[paste("rangeMonth",i,sep="")]][1], to = input[[paste("rangeMonth",i,sep="")]][2])
+          dates$month = as.numeric(format(dates$date, "%m"))
+          dates = dates[dates$month %in% months,]
+          
+          #Get the years of interest
+          years = seq(from = input[[paste("rangeYear",i,sep="")]][1], to = input[[paste("rangeYear",i,sep="")]][2])
+          dates$year = as.numeric(format(dates$date, "%Y"))
+          dates = dates[dates$year %in% years,]
+          reactiveData$intervalData[[i]] = database[['data']][database[['data']][,1] %in% dates$date,]
         }
-        #The user chooses by weekday
-        if(input$typeOfWeek1 == 0){
-          #get weekdays selected by user
-          dates = data.frame(date = database[['data']][,1])
-          dates = cutData(dates, type = "weekday", start.day = 1)
-          dates = dates[dates$weekday %in% input$rangeDay1,]
-        }
-        
-        #Get the hours of interest (the +1 is for the numeric transformation of openAir factor hour)
-        hours = seq(from = input$rangeHour1[1]+1, to = input$rangeHour1[2]+1)
-        dates = cutData(dates, type = "hour")
-        dates = dates[as.numeric(dates$hour) %in% hours,]
-        
-        #Get the months of interest
-        months = seq(from = input$rangeMonth1[1], to = input$rangeMonth1[2])
-        dates$month = as.numeric(format(dates$date, "%m"))
-        dates = dates[dates$month %in% months,]
-        
-        #Get the years of interest
-        years = seq(from = input$rangeYear1[1], to = input$rangeYear1[2])
-        dates$year = as.numeric(format(dates$date, "%Y"))
-        dates = dates[dates$year %in% years,]
-        reactiveData$intervalData[[1]] = database[['data']][database[['data']][,1] %in% dates$date,]
       }
     })
   })
