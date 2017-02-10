@@ -162,7 +162,7 @@ comparativeAnalysis <- function(input, output, session, database) {
             days = seq(from = input[[paste("rangeDay",i,sep="")]][1], to = input[[paste("rangeDay",i,sep="")]][2])
             dates = data.frame(date = database[['data']][,1])
             dates$day = as.numeric(format(dates$date, "%d"))
-            dates = dates[dates$day %in% input[[paste("rangeDay",i,sep="")]],]
+            dates = dates[dates$day %in% days,]
           }
           #The user chooses by weekday
           if(input[[paste("typeOfWeek",i,sep="")]] == 0){
