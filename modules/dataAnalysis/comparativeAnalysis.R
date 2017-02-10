@@ -50,7 +50,8 @@ comparativeAnalysisUI <- function(id) {
                     checkboxInput(ns("use3"),"Usar rango 3", FALSE)
              )),
              fluidRow(actionButton(ns("makeGraphs"),"Enviar cambios")),
-             fluidRow(uiOutput(ns("stationsUI")))
+             fluidRow(uiOutput(ns("stationsUI"))),
+             fluidRow(tableOutput(ns("numObsTable")))
              ),
     tabPanel("Graficos",
              plotlyOutput(ns("boxplot")))
@@ -126,6 +127,28 @@ comparativeAnalysis <- function(input, output, session, database) {
                        inline = TRUE
     )
   })
+  
+  output$numObsTable <- renderTable({
+    reactiveData$intervalData
+    browser()
+    isolate({
+      obsTable = data.frame(Estacion = names(database[['data']]), row.names = "Estacion")
+      row.names(obsTable)[1] = "Maximo de observaciones (maximo teorico)"
+      for(i in 1:3){
+        if(input[[paste("use",i,sep="")]] == TRUE){
+          obsTable[paste("Rango",i)] = colSums(!is.na(reactiveData$intervalData[[i]]))
+        }
+      }
+      #Check if the dataframe is empty, this avoid crash when there is no range dates selected (no columns in dt)
+      if(is.na(colnames(obsTable)[1])){
+        obsTable = NULL
+      }
+      obsTable
+    })
+  },
+  caption = "Numero de observaciones en cada estacion y rango de fecha", 
+  rownames = TRUE, colnames = TRUE, striped = TRUE, bordered = TRUE
+  )
   
   calcAvailavility<- observe({
     input$makeGraphs
