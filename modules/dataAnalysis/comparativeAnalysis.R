@@ -42,7 +42,7 @@ comparativeAnalysisUI <- function(id) {
                     sliderInput(ns("rangeMonth3"), "Mes:",
                                 min = 1, max = 12, value = c(1,12)),
                     selectInput(ns("typeOfWeek3"), label = "Numeracion de semanas:", 
-                                choices = list("Dias de la semana" = 0, "Numero de la semana" = 1), 
+                                choices = list("Dias de la semana" = 0, "Numero del dia" = 1), 
                                 selected = 0),
                     uiOutput(ns("weekui3")),
                     sliderInput(ns("rangeHour3"), "Hora:",
@@ -54,7 +54,8 @@ comparativeAnalysisUI <- function(id) {
              fluidRow(tableOutput(ns("numObsTable")))
              ),
     tabPanel("Graficos",
-             plotlyOutput(ns("boxplot")))
+             plotlyOutput(ns("boxplot")),
+             plotlyOutput(ns("scatterplot")))
   )
 }
 
@@ -77,7 +78,7 @@ comparativeAnalysis <- function(input, output, session, database) {
       )
     }
     else if (input$typeOfWeek1 == 1){
-      sliderInput(ns("rangeDay1"), "Dias del mes:",
+      sliderInput(ns("rangeDay1"), "Numero del dia:",
                   min = 1, max = 31, value = c(1,31))
     }
   })
@@ -96,7 +97,7 @@ comparativeAnalysis <- function(input, output, session, database) {
       )
     }
     else if (input$typeOfWeek2 == 1){
-      sliderInput(ns("rangeDay2"), "Dias del mes:",
+      sliderInput(ns("rangeDay2"), "Numero del dia:",
                   min = 1, max = 31, value = c(1,31))
     }
   })
@@ -115,7 +116,7 @@ comparativeAnalysis <- function(input, output, session, database) {
       )
     }
     else if (input$typeOfWeek3 == 1){
-      sliderInput(ns("rangeDay3"), "Dias del mes:",
+      sliderInput(ns("rangeDay3"), "Numero del dia:",
                   min = 1, max = 31, value = c(1,31))
     }
   })
@@ -130,7 +131,6 @@ comparativeAnalysis <- function(input, output, session, database) {
   
   output$numObsTable <- renderTable({
     reactiveData$intervalData
-    browser()
     isolate({
       obsTable = data.frame(Estacion = names(database[['data']]), row.names = "Estacion")
       row.names(obsTable)[1] = "Maximo de observaciones (maximo teorico)"
@@ -207,5 +207,20 @@ comparativeAnalysis <- function(input, output, session, database) {
     p = layout(p,boxmode = "group")
     p
   })
+  
+  #output$scatterplot <- renderPlotly({
+  #  p = plot_ly(x = input$stations, type = "scatter", visible = FALSE)
+  #  for(i in 1:3){
+  #    if(input[[paste("use",i,sep="")]] == TRUE){
+  #      info = reactiveData$intervalData[[i]]
+  #      info = stack(info, select = input$stations)
+  #      p = add_trace(dMeans, x = ~ind, y = ~values, 
+  #                    type = "scatter", error_y = list(value = dsd$values),
+  #                    visible = TRUE)
+  #    }
+  #  }
+  #  p = layout(p,scattermode = "group")
+  #  p
+  #})
   
 }
