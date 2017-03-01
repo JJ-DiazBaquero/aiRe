@@ -3,14 +3,17 @@ comparativeAnalysisUI <- function(id) {
   navbarPage(
     "Analisis comparativo",
     tabPanel("Fechas especiales",
-             selectInput(ns("selectedSpecialDate"), label = "Seleccione evento a analizar:",
+             fluidRow(
+              column(5,selectInput(ns("selectedSpecialDate"), label = "Seleccione evento a analizar:",
                          choices = list("Dia sin carro" = 0), 
-                         selected = 0),
-             sliderInput(ns("specialDateYears"), "Anios:",
-                         min = 2008, max = 2014, value = c(2008,2014)),
-             sliderInput(ns("specialDateHours"), "Hora:",
-                         min = 0, max = 23, value = c(0,23)),
-             actionButton(ns("specialDateSubmit"),"Enviar cambios")
+                         selected = 0)),
+              column(4,sliderInput(ns("specialDateYears"), "Anios:",
+                         min = 2008, max = 2014, value = c(2008,2014))),
+              column(3,sliderInput(ns("specialDateHours"), "Hora:",
+                         min = 0, max = 23, value = c(0,23)))
+             ),
+             actionButton(ns("specialDateSubmit"),"Enviar cambios"),
+             fluidRow(tableOutput(ns("specialDateNumObsTable")))
     ),
     tabPanel("Fechas Personalizadas",
              fluidRow(
@@ -22,7 +25,7 @@ comparativeAnalysisUI <- function(id) {
              sliderInput(ns("rangeMonth1"), "Mes:",
                          min = 1, max = 12, value = c(1,12)),
              selectInput(ns("typeOfWeek1"), label = "Numeracion de semanas:", 
-                         choices = list("Dias de la semana" = 0, "Numero de la semana" = 1), 
+                         choices = list("Dias de la semana" = 0, "Numero del dia" = 1), 
                          selected = 0),
              uiOutput(ns("weekui1")),
              sliderInput(ns("rangeHour1"), "Hora:",
@@ -37,7 +40,7 @@ comparativeAnalysisUI <- function(id) {
                     sliderInput(ns("rangeMonth2"), "Mes:",
                                 min = 1, max = 12, value = c(1,12)),
                     selectInput(ns("typeOfWeek2"), label = "Numeracion de semanas:", 
-                                choices = list("Dias de la semana" = 0, "Numero de la semana" = 1), 
+                                choices = list("Dias de la semana" = 0, "Numero del dia" = 1), 
                                 selected = 0),
                     uiOutput(ns("weekui2")),
                     sliderInput(ns("rangeHour2"), "Hora:",
@@ -144,11 +147,63 @@ comparativeAnalysis <- function(input, output, session, database) {
   calcSpecialDate <- observe({
     input$specialDateSubmit
     isolate({
-      data = read.csv("databases/SpecialDates.csv", sep=";", row.names=NULL, stringsAsFactors=TRUE)
-      data = as.POSIXct(as.character(data), format="%d/%m/%Y")
+      cat("Loading Special dates")
+      specialDates = read.csv("databases/SpecialDates.csv", sep=";", row.names=NULL, stringsAsFactors=FALSE, fill = FALSE)
+      specialDates[,1] = as.POSIXct(as.character(specialDates[,1]), format="%d/%m/%Y")
+      specialDates[,2] = as.POSIXct(as.character(specialDates[,2]), format="%d/%m/%Y")
+      
+      daysEval = specialDates[["BogotaDiaSinCarro"]][!is.na(specialDates[["BogotaDiaSinCarro"]])]
+      daysControl = specialDates[["Control.BogotaDiaSinCarro"]][!is.na(specialDates[["Control.BogotaDiaSinCarro"]])]
+      
+      hours = seq(from = input[["specialDateHours"]][1], to = input[["specialDateHours"]][2])
+      years = seq(from = input[["specialDateYears"]][1], to = input[["specialDateYears"]][2])
+      rangeEval = vector()
+      for(j in 1:length(daysEval)){
+        if(as.numeric(format(daysEval[j], "%Y") %in% years)){
+          rangeEval[(length(rangeEval)+1):(length(rangeEval)+length(hours))] = paste(daysEval[j]," ",hours,":00", sep = "")
+        }
+      }
+      rangeEval = as.POSIXct(as.character(rangeEval))
+      
+      rangeControl = vector()
+      for(j in 1:length(daysControl)){
+        if(as.numeric(format(daysControl[j], "%Y") %in% years)){
+          rangeControl[(length(rangeControl)+1):(length(rangeControl)+length(hours))] = paste(daysControl[j]," ",hours,":00", sep = "")
+        }
+      }
+      rangeControl = as.POSIXct(as.character(rangeControl))
+      
+      
+      updateTextInput(session,"nameRange1", value =  "BogotaDiaSinCarro")
+      updateTextInput(session,"nameRange2", value =  "Control.BogotaDiaSinCarro")
+      reactiveData$intervalData[[1]] = database[['data']][database[['data']][,1] %in% rangeEval,]
+      reactiveData$intervalData[[2]] = database[['data']][database[['data']][,1] %in% rangeControl,]
+      updateCheckboxInput(session, "use1", value = T)
+      updateCheckboxInput(session, "use2", value = T)
+      
     })
   })
   
+  output$specialDateNumObsTable <- renderTable({
+    reactiveData$intervalData
+    isolate({
+      obsTable = data.frame(Estacion = names(database[['data']]), row.names = "Estacion")
+      row.names(obsTable)[1] = "Maximo de observaciones (maximo teorico)"
+      for(i in 1:3){
+        if(input[[paste("use",i,sep="")]] == TRUE){
+          obsTable[paste("Rango",i)] = colSums(!is.na(reactiveData$intervalData[[i]]))
+        }
+      }
+      #Check if the dataframe is empty, this avoid crash when there is no range dates selected (no columns in dt)
+      if(is.na(colnames(obsTable)[1])){
+        obsTable = NULL
+      }
+      obsTable
+    })
+  },
+  caption = "Numero de observaciones en cada estacion y rango de fecha", 
+  rownames = TRUE, colnames = TRUE, striped = TRUE, bordered = TRUE
+  )
   #This function build the boxplot with the information in each selected range
   #The "stack" method is the lenghtiest operation in this method
   #TODO search another way to build boxplot without using "stack" and keep same behaviour

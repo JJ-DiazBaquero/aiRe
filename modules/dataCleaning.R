@@ -13,7 +13,7 @@ dataCleaningUI <- function(id){
       checkboxGroupInput(ns("generalRules"), label = h3("Reglas generales"), 
                          choices = list("1. Restriccion de cadenas de texto" = 1, 
                                         "2. Valores negativos y ceros" = 2, 
-                                        "3. Limite de detección del equipo" = 3)
+                                        "3. Limite de deteccion del equipo" = 3)
                          ),
       checkboxGroupInput(ns("particularRules"), label = h3("Reglas particulares a PM2.5"), 
                          choices = list("4. Asegurar PM10 > PM2.5" = 1)
