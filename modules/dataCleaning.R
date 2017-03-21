@@ -6,7 +6,7 @@ dataCleaningUI <- function(id){
   titlePanel("Limpieza de datos")
   sidebarLayout(
     sidebarPanel(
-      selectInput(ns("dataBase"), label = h3("Seleccione una base datos"), 
+      selectInput(ns("dataBase"), label = h3("Seleccione una base de datos"), 
                   choices = list("PM2.5" = 1, "PM10" = 2), 
                   selected = 1),
       hr(),
@@ -32,8 +32,7 @@ dataCleaningUI <- function(id){
       p("El siguiente grafico indica el porcentaje de los datos que pertenecen a la categoria en la derecha"),
       plotlyOutput(ns("plot")),
       tableOutput(ns("rulesTable")),
-      verbatimTextOutput(ns("summary")),
-      textOutput(ns("prueba"))
+      verbatimTextOutput(ns("summary"))
     )
   )
 }
@@ -50,10 +49,15 @@ dataCleaning <- function(input, output, session, database){
   rulesSummary <- reactiveValues(data = rulesSummarydf, 
                                  rulesMatrix = array(0,dim = isolate(c(6,length(database[['data']])-1,nrow(database[['data']])))),
                                  rulesApplied = NULL)
-  output$prueba <- renderText({
-    return(input$dateRange)
+  # This method change the current database when the user change it
+  changeCurrentDataBase = observe({
+    if(input$dataBase == 1){
+      database[['data']] = database[['datapm2.5']]
+    }
+    else if (input$dataBase == 2){
+      database[['data']] = database[['datapm10']]
+    }
   })
-  
   #This method apply the rules that are selected when the user click on button
   applyRules <- observe({
     input$applyRulesBtn
@@ -100,8 +104,8 @@ dataCleaning <- function(input, output, session, database){
     if(3 %in% isolate(input$generalRules) && !(3 %in% rulesSummary$rulesApplied)){
       progress$inc(1, detail="Regla 3")
       cat("\n Aplicando regla 3 \n")
-      #cat(summary(database))
-      #Quitar todos los valores inferiores a 1
+      # cat(summary(database))
+      # Quitar todos los valores inferiores a 1
       rule3Array = c(rep(0,nrow(database[['data']])))
       for(i in 2:length(database[['data']])){
         rule3Array[database[['data']][,i] <= 1] = TRUE
@@ -113,7 +117,14 @@ dataCleaning <- function(input, output, session, database){
       }
       rulesSummary$rulesApplied[3] = 3
     }
-    progress$inc(1, detail="Regla 3")
+    # Update changes in database
+    progress$inc(1, detail="Update Database")
+    if(input$dataBase == 1){
+      database[['datapm2.5']] = database[['data']]
+    }
+    else if (input$dataBase == 2){
+      database[['datapm10']] = database[['data']] 
+    }
     })
   })
   
