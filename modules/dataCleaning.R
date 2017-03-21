@@ -52,10 +52,33 @@ dataCleaning <- function(input, output, session, database){
   # This method change the current database when the user change it
   changeCurrentDataBase = observe({
     if(input$dataBase == 1){
-      database[['data']] = database[['datapm2.5']]
+      isolate({
+        database[['data']] = database[['datapm2.5']]
+        # Update Tables
+        rulesSummarydf = data.frame(Estaciones = colnames(database[['data']])[2:12])
+        for(i in 1:6){
+          rulesSummarydf[paste("Regla ",i)] = rep(0,11)
+        }
+        rulesSummarydf["Datos validos"] = rep(1,11)
+      
+        rulesSummary$data = rulesSummarydf
+        rulesSummary$rulesMatrix = array(0,dim = isolate(c(6,length(database[['data']])-1,nrow(database[['data']]))))
+        rulesSummary$rulesApplied = NULL
+      })
     }
     else if (input$dataBase == 2){
-      database[['data']] = database[['datapm10']]
+      isolate({
+        database[['data']] = database[['datapm10']]
+        # Update tables
+        rulesSummarydf = isolate(data.frame(Estaciones = colnames(database[['data']])[2:19]))
+        for(i in 1:6){
+          rulesSummarydf[paste("Regla ",i)] = rep(0,18)
+        }
+        rulesSummarydf["Datos validos"] = rep(1,18)
+        rulesSummary$data = rulesSummarydf
+        rulesSummary$rulesMatrix = array(0,dim = isolate(c(6,length(database[['data']])-1,nrow(database[['data']]))))
+        rulesSummary$rulesApplied = NULL
+      })
     }
   })
   #This method apply the rules that are selected when the user click on button

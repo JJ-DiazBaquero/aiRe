@@ -17,9 +17,9 @@ dataAvailability <- function(input, output, session, database) {
     on.exit(progress$close())
       dataSummary$data = matrix(0,
                                 nrow = nrow(database[['data']]),
-                                ncol = length(database[['data']][2:12]))
+                                ncol = length(database[['data']][-1]))
       cat("Calcular matriz de disponibilidad")
-      dataSummary[['data']][!is.na(database[['data']][2:12])] = 1
+      dataSummary[['data']][!is.na(database[['data']][-1])] = 1
       vars = list()
       for (i in 2:length(database[['data']])) {
         progress$inc(1)
