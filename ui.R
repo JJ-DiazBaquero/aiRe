@@ -14,9 +14,13 @@ source("modules/dataCleaning.R")
 source("modules/dataAnalysis.R")
 
 # Define UI for application that draws a histogram
-shinyUI(navbarPage("Proyecto de calidad de aire",inverse = T,
-  tabPanel("Descripción",
-           descriptionUI("functionDescription")),
+shinyUI(
+  navbarPage("Proyecto de calidad de aire",inverse = T,
+  tabPanel("Descripción", 
+           descriptionUI("functionDescription"),
+           tags$head(tags$script(src="google-maps.js")),
+           tags$head(tags$script(src="MainCtrl.js"))
+           ),
   tabPanel("Carga de datos",
             dataLoadingUI("dataLoading")),
   tabPanel("Limpieza de datos",

@@ -20,7 +20,9 @@ shinyServer(function(input, output, session) {
   
   cat("lines of code \n")
   cat(length(readLines("server.R"))+length(readLines("ui.R"))+length(readLines("modules/functionDescription.R"))+
-        length(readLines("modules/dataLoading.R"))+length(readLines("modules/dataCleaning.R"))+length(readLines("modules/dataAnalysis.R")))
+        length(readLines("modules/dataLoading.R"))+length(readLines("modules/dataCleaning.R"))
+      +length(readLines("modules/dataAnalysis.R"))+length(readLines("modules/dataAnalysis/comparativeAnalysis.R"))
+      +length(readLines("modules/dataAnalysis/dataAvailability.R")))
   
   load <- observe({
     isolate({

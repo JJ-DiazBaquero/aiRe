@@ -303,6 +303,4 @@ comparativeAnalysis <- function(input, output, session, database) {
                        inline = TRUE
     )
   })
-  
-  
 }
