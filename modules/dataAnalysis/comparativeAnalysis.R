@@ -79,6 +79,7 @@ comparativeAnalysis <- function(input, output, session, database) {
   
   output$numObsTable <- renderTable({
     reactiveData$intervalData
+    database[['data']]
     isolate({
       obsTable = data.frame(Estacion = names(database[['data']]), row.names = "Estacion")
       row.names(obsTable)[1] = "Maximo de observaciones (maximo teorico)"
