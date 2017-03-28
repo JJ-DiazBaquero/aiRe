@@ -26,7 +26,8 @@ dataCleaningUI <- function(id){
                      "Rango de fechas a visualizar", 
                      language = "es", separator = "a", format = "dd-mm-yyyy",
                      start = "1998-01-01", end = "2014-12-31", 
-                     min = "1998-01-01", max = "2014-12-31")
+                     min = "1998-01-01", max = "2014-12-31"),
+      downloadButton(ns('downloadData'), 'Descargar los datos')
     ),
     mainPanel(
       p("El siguiente grafico indica el porcentaje de los datos que pertenecen a la categoria en la derecha"),
@@ -192,4 +193,21 @@ dataCleaning <- function(input, output, session, database){
                      xaxis = list(title = ""), 
                      yaxis = list(title = "Porcentaje de datos"))
   })
+  
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      #paste("data",input$dataBase,"-",as.POSIXlt(input$dateRange[1],format="%d/%m/%Y %H:%M"),"-",
+      #      as.POSIXlt(input$dateRange[2],format="%d/%m/%Y %H:%M"),".csv", sep="")
+      dataName = switch(input$dataBase, "1"="pm25", "2"="pm10","Unknown")
+      paste("cleanData",dataName,"-",gsub("-","/",input$dateRange[1]),"-",
+            gsub("-","/",input$dateRange[2]),".csv", sep="")
+    },
+    content = function(file) {
+      date1 = as.POSIXlt(input$dateRange[1],format="%d/%m/%Y %H:%M")
+      date2 = as.POSIXlt(input$dateRange[2],format="%d/%m/%Y %H:%M")
+      timeInterval = seq.POSIXt(from=date1, to=date2, by="hour")
+      dataToDownload = database[['data']][database[['data']][,1] %in% timeInterval,]
+      return(write.csv(dataToDownload, file))
+    }
+  )
 }
