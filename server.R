@@ -12,10 +12,9 @@ source("modules/functionDescription.R")
 source("modules/dataLoading.R")
 source("modules/dataCleaning.R")
 source("modules/dataAnalysis.R")
-
+source("modules/reports.R")
 
 # Define server logic required to draw a histogram
-
 shinyServer(function(input, output, session) {
   
   cat("lines of code \n")
@@ -50,6 +49,11 @@ shinyServer(function(input, output, session) {
         callModule(dataAnalysis, "dataAnalysis", database = loadingController)
       progress$set(message = "Construyendo Aplicación",
                    detail = "Modulo de análisis de datos",
+                   value = 1)
+      controllerReports <-
+        callModule(reports, "reports", database = loadingController)
+      progress$set(message = "Construyendo Aplicación",
+                   detail = "Modulo de reportes",
                    value = 1)
     })
   })

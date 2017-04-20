@@ -12,6 +12,7 @@ source("modules/functionDescription.R")
 source("modules/dataLoading.R")
 source("modules/dataCleaning.R")
 source("modules/dataAnalysis.R")
+source("modules/reports.R")
 
 # Define UI for application that draws a histogram
 shinyUI(
@@ -27,7 +28,8 @@ shinyUI(
            dataCleaningUI("dataCleaning")),
   tabPanel("Análisis de datos",
            dataAnalysisUI("dataAnalysis")),
-  tabPanel("Reportes"),
+  tabPanel("Reportes",
+           reportsUI("reports")),
   tabPanel("Cuadro de control")
   )
 )
