@@ -63,7 +63,7 @@ shinyServer(function(input, output, session) {
     if(!is.null(input$dataLoading_hover)){
       taglist(
         h3("Carga de datos"),
-        textInput("label", "En esta accion puede subir la base de datos como un archivo csv, puede visualizarlos y configurarlos")
+        textInput("label", "En esta acción puede subir la base de datos como un archivo csv, puede visualizarlos y configurarlos")
       )
     }
     else if (!is.null(input$dataAvailability_hover)){
