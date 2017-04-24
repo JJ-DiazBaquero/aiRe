@@ -1,24 +1,34 @@
+library(openair)
 timeSeriesUI <- function(id){
   ns <- NS(id)
   titlePanel("Series de tiempo")
   fluidPage(
     radioButtons(ns("AgregationLevel"), "Seleccion de agrupacion", 
-                 choices = list(hora = 1, dia = 2, semana = 3, mes = 4, anio = 5),
-                 selected = 2),
+                 choices = list(hora = 1, dia = 2, semana = 3, mes = 4, trimestre = 5, anio = 6),
+                 inline = TRUE,
+                 selected = 3),
     uiOutput(ns("stations")),
     plotlyOutput(ns("timeSeries"))
   )
 }
 timeSeries <- function(input, output, session, database){
-  
-  output$stations <- renderUI({
-    selectInput("selectedStation", "Seleccionar estacion a mostrar", 
-                choices = colnames(database[['data']])[-1])
+  ns <- session$ns
+  output$timeSeries <- renderPlotly({
+    input$calculatePlot
+    temporality = switch(input$AgregationLevel, '1' = 'hour', '2' = 'day', '3' = 'week', '4' = 'month', '5' = 'quarter', '6' = 'year')
+    dataToAvg = data.frame(date = database[['data']][,1],
+                           var = database[['data']][,which(colnames(database[['data']])==input$selectedStation)])
+    dataAvged = timeAverage(dataToAvg, avg.time = temporality, interval = "hour")
+    p = plot_ly(x = dataAvged$date,y = dataAvged$var,
+                type = 'scatter', mode = 'lines')
+    p
   })
   
-  output$timeSeries <- renderPlotly({
-    p = plot_ly(x = as.POSIXct(database[['data']][,1]),
-                y = database[['data']][,which(colnames(database[['data']])==input$selectedStation)],
-                type = 'scatter', mode = 'lines')
+  output$stations <- renderUI({
+    options = colnames(database[['data']])[-1]
+    options = setNames(options,colnames(database[['data']])[-1])
+    selectInput(ns("selectedStation"), "Seleccionar estacion a mostrar", 
+                choices = options,
+                selected = options[1])
   })
 }
