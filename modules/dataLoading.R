@@ -23,6 +23,7 @@ dataLoading <- function(input, output, session) {
       database$datapm2.5[,1] = as.POSIXct(as.character(database$data[,1]), format="%d/%m/%Y %H:%M")
       database$datapm10[,1] = as.POSIXct(as.character(database$datapm10[,1]), format="%m/%d/%Y %H:%M")
       database$data = database$datapm2.5[,1]
+      database$currentData = 'pm2.5'
     })  
   })
   output$summary = renderDataTable({
