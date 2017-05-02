@@ -54,6 +54,7 @@ dataCleaning <- function(input, output, session, database){
   changeCurrentDataBase = observe({
     if(input$dataBase == 1){
       isolate({
+        database$currentData = 'pm2.5'
         database[['data']] = database[['datapm2.5']]
         # Update Tables
         rulesSummarydf = data.frame(Estaciones = colnames(database[['data']])[2:12])
@@ -69,6 +70,7 @@ dataCleaning <- function(input, output, session, database){
     }
     else if (input$dataBase == 2){
       isolate({
+        database$currentData = 'pm10'
         database[['data']] = database[['datapm10']]
         # Update tables
         rulesSummarydf = isolate(data.frame(Estaciones = colnames(database[['data']])[2:19]))
