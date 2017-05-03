@@ -41,7 +41,6 @@ ICA <- function(input, output, session, database){
         color_s[[1]][[i+1]] <-  (1/6)*i
       }
       ICA_dataSummary$plotData = data.frame(ICA_vars)
-      browser()
       output$heatMapICA <- renderPlotly({
         p = plot_ly(
           z = ICA_dataSummary$plotData[['ICA']],

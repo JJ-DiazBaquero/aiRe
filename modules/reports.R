@@ -3,7 +3,7 @@ source("modules/reports/ICA.R")
 reportsUI <- function(id){
   ns <- NS(id)
   navbarPage(
-    "Resporte de datos",
+    "Reporte de datos",
     tabPanel("Series de tiempo", timeSeriesUI(ns("timeSeries"))),
     tabPanel("ICA", ICAUI(ns("ICA")))
   )

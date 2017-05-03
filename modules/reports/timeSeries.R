@@ -14,7 +14,6 @@ timeSeriesUI <- function(id){
 timeSeries <- function(input, output, session, database){
   ns <- session$ns
   output$timeSeries <- renderPlotly({
-    input$calculatePlot
     temporality = switch(input$AgregationLevel, '1' = 'hour', '2' = 'day', '3' = 'week', '4' = 'month', '5' = 'quarter', '6' = 'year')
     dataToAvg = data.frame(date = database[['data']][,1],
                            var = database[['data']][,which(colnames(database[['data']])==input$selectedStation)])
