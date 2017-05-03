@@ -10,7 +10,6 @@ ICA <- function(input, output, session, database){
   ns <- session$ns
   #------------------------------------------------- ICA Indicator--------------------------------
   #Generate ICA dataframe
-  browser()
   ICA_dataSummary <- reactiveValues(plotData = list())
   calcICA <- observe({
     if(is.numeric(database[['data']]$Kennedy)) {
