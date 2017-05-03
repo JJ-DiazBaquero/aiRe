@@ -10,7 +10,6 @@ ICA <- function(input, output, session, database){
   ns <- session$ns
   #------------------------------------------------- ICA Indicator--------------------------------
   #Generate ICA dataframe
-  browser()
   ICA_dataSummary <- reactiveValues(plotData = list())
   calcICA <- observe({
     if(is.numeric(database[['data']]$Kennedy)) {
@@ -25,8 +24,15 @@ ICA <- function(input, output, session, database){
         ICA_vars$Estacion[length(ICA_vars$Estacion):(length(ICA_vars$Estacion) + length(dataAvged$var))] = colnames(database[['data']])[i]
       }
       ICA_df <- data.frame(ICA_vars)
-      ICA_vars$ICA <- ifelse(is.na(ICA_df$Mean), 0, ifelse(ICA_df$Mean < 54, 7, ifelse(ICA_df$Mean  < 154, 6, ifelse(ICA_df$Mean  < 254, 5, ifelse(ICA_df$Mean  < 354, 4, ifelse(ICA_df$Mean  < 424, 3, ifelse(ICA_df$Mean < 504, 2, ifelse(ICA_df$Mean < 604, 1, 0))))))))
-      ICA_vars$Color <- ifelse(is.na(ICA_df$Mean), "#000000", ifelse(ICA_df$Mean < 54, "#00de28", ifelse(ICA_df$Mean  < 154, "#fffd40", ifelse(ICA_df$Mean  < 254, "ff8730", ifelse(ICA_df$Mean  < 354, "#ff3d2b", ifelse(ICA_df$Mean  < 424, "#984796", ifelse(ICA_df$Mean < 504, "#881924", ifelse(ICA_df$Mean < 604, "#881924", "#000000"))))))))
+      if (database$currentData == 'pm2.5') {
+        ICA_vars$ICA <- ifelse(is.na(ICA_df$Mean), 0, ifelse(ICA_df$Mean < 54, 7, ifelse(ICA_df$Mean  < 154, 6, ifelse(ICA_df$Mean  < 254, 5, ifelse(ICA_df$Mean  < 151, 4, ifelse(ICA_df$Mean  < 251, 3, ifelse(ICA_df$Mean < 351, 2, ifelse(ICA_df$Mean < 501, 1, 0))))))))
+      }  
+      
+      if (database$currentData == 'pm10') {
+        ICA_vars$ICA <- ifelse(is.na(ICA_df$Mean), 0, ifelse(ICA_df$Mean < 12, 7, ifelse(ICA_df$Mean  < 36, 6, ifelse(ICA_df$Mean  < 56, 5, ifelse(ICA_df$Mean  < 354, 4, ifelse(ICA_df$Mean  < 424, 3, ifelse(ICA_df$Mean < 504, 2, ifelse(ICA_df$Mean < 604, 1, 0))))))))
+      }
+      
+      ICA_vars$Color <- ifelse(is.na(ICA_df$Mean), "#333333", ifelse(ICA_df$Mean < 54, "#00de28", ifelse(ICA_df$Mean  < 154, "#fffd40", ifelse(ICA_df$Mean  < 254, "ff8730", ifelse(ICA_df$Mean  < 354, "#ff3d2b", ifelse(ICA_df$Mean  < 424, "#984796", ifelse(ICA_df$Mean < 504, "#881924", ifelse(ICA_df$Mean < 604, "#881924", "#333333"))))))))
       df_colors = data.frame(range=c(0:6), colors=c(0:6))
       color_s <- setNames(data.frame(df_colors$range, df_colors$colors), NULL)
       
