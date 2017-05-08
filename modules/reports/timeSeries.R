@@ -20,6 +20,9 @@ timeSeries <- function(input, output, session, database){
     dataAvged = timeAverage(dataToAvg, avg.time = temporality, interval = "hour")
     p = plot_ly(x = dataAvged$date,y = dataAvged$var,
                 type = 'scatter', mode = 'lines')
+    p <- layout(p, title = paste("Concentracion de",database$currentData,"en", input$selectedStation), 
+                          xaxis = list(title = "Tiempo"), 
+                          yaxis = list(title = paste("Concentracion de",database$currentData)))
     p
   })
   
