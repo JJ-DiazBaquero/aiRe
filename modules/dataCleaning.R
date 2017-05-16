@@ -22,11 +22,7 @@ dataCleaningUI <- function(id){
                          choices = list("5. Eliminar datos aislados" = 5)
       ),
       actionButton(ns("applyRulesBtn"), "Aplicar reglas"),
-      dateRangeInput(ns("dateRange"), 
-                     "Rango de fechas a visualizar", 
-                     language = "es", separator = "a", format = "dd-mm-yyyy",
-                     start = "1998-01-01", end = "2014-12-31", 
-                     min = "1998-01-01", max = "2014-12-31"),
+      uiOutput(ns("uiDateRange")),
       downloadButton(ns('downloadData'), 'Descargar los datos')
     ),
     mainPanel(
@@ -39,6 +35,7 @@ dataCleaningUI <- function(id){
 }
 
 dataCleaning <- function(input, output, session, database){
+  ns <- session$ns
   rulesSummarydf = isolate(data.frame(Estaciones = colnames(database[['data']])[2:12]))
   for(i in 1:6){
     rulesSummarydf[paste("Regla ",i)] = rep(0,11)
@@ -50,8 +47,19 @@ dataCleaning <- function(input, output, session, database){
   rulesSummary <- reactiveValues(data = rulesSummarydf, 
                                  rulesMatrix = array(0,dim = isolate(c(6,length(database[['data']])-1,nrow(database[['data']])))),
                                  rulesApplied = NULL)
+  
+  output$uiDateRange <- renderUI({
+    dateRangeInput(ns("dateRange"), 
+                   "Rango de fechas a visualizar", 
+                   language = "es", separator = "a", format = "yyyy-mm-dd",
+                   start = as.character(database[['data']][1,1]),
+                   end = strsplit(as.character(database[['data']][nrow(database[['data']]),1])," ")[[1]][1], 
+                   min = as.character(database[['data']][1,1]), 
+                   max = strsplit(as.character(database[['data']][nrow(database[['data']]),1])," ")[[1]][1])
+  })
+    
   # This method change the current database when the user change it
-  changeCurrentDataBase = observe({
+  changeCurrentDataBase <- observe({
     if(input$dataBase == 1){
       isolate({
         database$currentData = 'pm2.5'
@@ -208,10 +216,13 @@ dataCleaning <- function(input, output, session, database){
     progress$set(message = "Generando grafico", value = 0)
     
     input$dateRange
-    date1 = as.POSIXlt(input$dateRange[1],format="%d/%m/%Y %H:%M")
-    date2 = as.POSIXlt(input$dateRange[2],format="%d/%m/%Y %H:%M")
-    timeInterval = seq.POSIXt(from=date1, to=date2, by="hour")
-    
+    if(!is.null(input$dateRange)){
+      date1 = as.POSIXlt(input$dateRange[1],format="%d/%m/%Y %H:%M")
+      date2 = as.POSIXlt(input$dateRange[2],format="%d/%m/%Y %H:%M")
+      timeInterval = seq.POSIXt(from=date1, to=date2, by="hour")
+    } else
+      timeInterval = c(1,2,3)
+      
     #to many obs, need to subcript by each rule
     dataSubset = rulesSummary$rulesMatrix[,,which(database[['data']][,1] %in% timeInterval)]
     cat("Length of timeInterval")
