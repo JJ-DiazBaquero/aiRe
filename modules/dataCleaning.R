@@ -112,6 +112,7 @@ dataCleaning <- function(input, output, session, database){
         rule1Array[database[['data']][,i] %in% strList] = TRUE
         database[['data']][rule1Array == 1,i] = NA
         database[['data']][,i] = as.numeric(gsub(",",".",database[['data']][,i]))
+        database[['data']][is.nan(database[['data']][,i]),i] = NA
         rulesSummary$data[i-1,2] = sum(rule1Array)/nrow(database[['data']])
         rulesSummary$data[i-1,8] = 1- sum(rulesSummary$data[i-1,2:7])
         rulesSummary$rulesMatrix[1,i-1,] = rule1Array

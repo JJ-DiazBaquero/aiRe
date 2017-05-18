@@ -21,8 +21,8 @@ dataLoadingUI <- function(id, label = "Data Loading") {
 
 dataLoading <- function(input, output, session) {
   
-  database <- reactiveValues(datapm10 = read.csv("databases/PM10_1998_2014_Encsv.csv", sep=";", row.names=NULL, stringsAsFactors=TRUE),
-                             datapm2.5 = read.csv("databases/PM2.5_1998_2014_Encsv.csv", sep=";", row.names=NULL, stringsAsFactors=TRUE),
+  database <- reactiveValues(datapm10 = read.csv("databases/PM10_1998_2016_Encsv.csv", sep=";", row.names=NULL, stringsAsFactors=TRUE),
+                             datapm2.5 = read.csv("databases/PM2.5_1998_2016_Encsv.csv", sep=";", row.names=NULL, stringsAsFactors=TRUE),
                              data = NULL)
   database[['data']] <- database[['datapm2.5']]
   
