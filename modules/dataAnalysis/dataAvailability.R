@@ -20,6 +20,7 @@ dataAvailability <- function(input, output, session, database) {
                                 ncol = length(database[['data']][-1]))
       cat("Calcular matriz de disponibilidad")
       dataSummary[['data']][!is.na(database[['data']][-1])] = 1
+      
       vars = list()
       for (i in 2:length(database[['data']])) {
         progress$inc(1)
@@ -33,14 +34,14 @@ dataAvailability <- function(input, output, session, database) {
     })
   })
   output$heatMap <- renderPlotly({
-    browser()
+    #This command removes any NaN value that may exist in the data
+    dataSummary$plotData[is.nan(dataSummary$plotData[,2]),2] = 0
     p = plot_ly(
       z = dataSummary$plotData[['Mean']],
       type = "heatmap",
       x = as.POSIXct(dataSummary$plotData[["Fecha"]], origin = "1970-01-01"),
       xtype = 'date',
-      y = as.character(dataSummary$plotData[['Estacion']]),
-      smoothing = 1
+      y = as.character(dataSummary$plotData[['Estacion']])
     )
   })
 }
