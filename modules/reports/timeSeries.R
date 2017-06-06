@@ -15,12 +15,13 @@ timeSeries <- function(input, output, session, database){
   ns <- session$ns
   output$timeSeries <- renderPlotly({
     temporality = switch(input$AgregationLevel, '1' = 'hour', '2' = 'day', '3' = 'week', '4' = 'month', '5' = 'quarter', '6' = 'year')
+    temporalidad = switch(input$AgregationLevel, '1' = 'hora', '2' = 'dia', '3' = 'semana', '4' = 'mes', '5' = 'trimestre', '6' = 'anio')
     dataToAvg = data.frame(date = database[['data']][,1],
                            var = database[['data']][,which(colnames(database[['data']])==input$selectedStation)])
     dataAvged = timeAverage(dataToAvg, avg.time = temporality, interval = "hour")
     p = plot_ly(x = dataAvged$date,y = dataAvged$var,
                 type = 'scatter', mode = 'lines')
-    p <- layout(p, title = paste("Concentracion de",database$currentData,"en", input$selectedStation), 
+    p <- layout(p, title = paste("Promedio",temporalidad,"de",database$currentData,"en", input$selectedStation), 
                           xaxis = list(title = "Tiempo"), 
                           yaxis = list(title = paste("Concentracion de",database$currentData)))
     p

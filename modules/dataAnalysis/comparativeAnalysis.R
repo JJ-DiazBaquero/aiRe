@@ -218,7 +218,9 @@ comparativeAnalysis <- function(input, output, session, database) {
                       name = input[[paste("nameRange",i,sep="")]], visible = TRUE)
       }
     }
-    p = layout(p,boxmode = "group")
+    p = layout(p,boxmode = "group", title = paste("Comparacion de",database$currentData),
+               xaxis = list(title = "Estacion"), 
+               yaxis = list(title = paste("Concentracion de",database$currentData)))
     p
   })
   

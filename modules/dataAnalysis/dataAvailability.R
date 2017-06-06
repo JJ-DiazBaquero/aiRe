@@ -43,5 +43,7 @@ dataAvailability <- function(input, output, session, database) {
       xtype = 'date',
       y = as.character(dataSummary$plotData[['Estacion']])
     )
+    layout(p, title = paste("Disponibilidad de datos agregado diario para",database$currentData),
+           xaxis = list(title = "Tiempo"))
   })
 }
