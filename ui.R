@@ -30,7 +30,7 @@ shinyUI(
            dataLoadingUI("dataLoading")),
   tabPanel("Limpieza de datos",
            dataCleaningUI("dataCleaning")),
-  tabPanel("Análisis de datos",
+  tabPanel("Analisis de datos",
            dataAnalysisUI("dataAnalysis")),
   tabPanel("Reportes",
            reportsUI("reports")),

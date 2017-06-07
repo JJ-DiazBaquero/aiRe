@@ -4,7 +4,7 @@ timeSeriesUI <- function(id){
   titlePanel("Series de tiempo")
   fluidPage(
     radioButtons(ns("AgregationLevel"), "Seleccion de agrupacion", 
-                 choices = list(hora = 1, dia = 2, semana = 3, mes = 4, trimestre = 5, anio = 6),
+                 choices = list(Hora = 1, Dia = 2, Semana = 3, Mes = 4, Trimestre = 5, Anio = 6),
                  inline = TRUE,
                  selected = 3),
     uiOutput(ns("stations")),

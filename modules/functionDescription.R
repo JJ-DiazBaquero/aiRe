@@ -16,25 +16,25 @@ descriptionUI <- function(id){
 description <- function(input, output, session){
   output$data_loading <- renderUI({
     tagList(
-      p("Aqui va la descripcion de la función de carga de datos")
+      p("Aqui va la descripcion de la funcion de carga de datos")
     )
   })
   output$data_cleaning <- renderUI({
     tagList(
-      p("Aqui va la descripcion de la función de limpieza de datos")
+      p("Aqui va la descripcion de la funcion de limpieza de datos")
     )
   })
   output$data_analysis <- renderUI({
     tagList(
-      p("Aqui va la descripcion de la función de analisis de datos")
+      p("Aqui va la descripcion de la funcion de analisis de datos")
     )
   })
   output$reports <- renderUI({
-      p("Aqui va la descripcion de la función de reportes")
+      p("Aqui va la descripcion de la funcion de reportes")
   })
   output$dashboard <- renderUI({
     tagList(
-      p("Aqui va la descripcion de la función de visualizar el dashboard")
+      p("Aqui va la descripcion de la funcion de visualizar el dashboard")
     )
   })
 }

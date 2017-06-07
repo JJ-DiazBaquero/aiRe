@@ -13,7 +13,7 @@ dataAvailability <- function(input, output, session, database) {
     input$recalculateMatrix
     isolate({
       progress <- Progress$new(session, min  = 2, max = length(database[['data']]))
-      progress$set(message="Análisis de datos - Matriz de disponibilidad",value =2)
+      progress$set(message="Analisis de datos - Matriz de disponibilidad",value =2)
       on.exit(progress$close())
       dataSummary$data = matrix(0,
                                 nrow = nrow(database[['data']]),
