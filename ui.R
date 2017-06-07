@@ -13,23 +13,26 @@ source("modules/dataLoading.R")
 source("modules/dataCleaning.R")
 source("modules/dataAnalysis.R")
 source("modules/reports.R")
-
+# "<img src='University_of_Los_Andes_logo.svg' height = 70 align=right style= 'position:relative; z-index:-1; right:0;padding-right: 0px;' />"
 # Define UI for application that draws a histogram
 shinyUI(
-  navbarPage("Proyecto de calidad de aire",inverse = T,
+  navbarPage(title = div(class = "row",
+    div(class = "col-sm-2",a(href="https://uniandes.edu.co/", target="_blank",img(src='University_of_Los_Andes_logo.svg', height = 35, style= 'position:relative; z-index:-1; left:0;padding-right: 0px;'))),
+    div(class = "col-sm-10","Proyecto de calidad de aire")
+  ),
+  windowTitle = "Proyecto de calidad de aire",inverse = T,
   tabPanel("Descripción", 
            descriptionUI("functionDescription"),
            tags$head(tags$script(src="google-maps.js")),
            tags$head(tags$script(src="MainCtrl.js"))
-           ),
+  ),
   tabPanel("Carga de datos",
-            dataLoadingUI("dataLoading")),
+           dataLoadingUI("dataLoading")),
   tabPanel("Limpieza de datos",
            dataCleaningUI("dataCleaning")),
   tabPanel("Análisis de datos",
            dataAnalysisUI("dataAnalysis")),
   tabPanel("Reportes",
            reportsUI("reports")),
-  tabPanel("Cuadro de control")
-  )
-)
+  tabPanel("Cuadro de control"))
+)  

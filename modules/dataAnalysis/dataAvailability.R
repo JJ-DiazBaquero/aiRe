@@ -12,14 +12,15 @@ dataAvailability <- function(input, output, session, database) {
   calcAvailavility <- observe({
     input$recalculateMatrix
     isolate({
-    progress <- Progress$new(session, min  = 2, max = length(database[['data']]))
-    progress$set(message="Análisis de datos - Matriz de disponibilidad",value =2)
-    on.exit(progress$close())
+      progress <- Progress$new(session, min  = 2, max = length(database[['data']]))
+      progress$set(message="Análisis de datos - Matriz de disponibilidad",value =2)
+      on.exit(progress$close())
       dataSummary$data = matrix(0,
                                 nrow = nrow(database[['data']]),
                                 ncol = length(database[['data']][-1]))
       cat("Calcular matriz de disponibilidad")
       dataSummary[['data']][!is.na(database[['data']][-1])] = 1
+      
       vars = list()
       for (i in 2:length(database[['data']])) {
         progress$inc(1)
@@ -33,13 +34,16 @@ dataAvailability <- function(input, output, session, database) {
     })
   })
   output$heatMap <- renderPlotly({
+    #This command removes any NaN value that may exist in the data
+    dataSummary$plotData[is.nan(dataSummary$plotData[,2]),2] = 0
     p = plot_ly(
       z = dataSummary$plotData[['Mean']],
       type = "heatmap",
-      x = as.POSIXct(dataSummary$plotData[['Fecha']], origin ="1970-01-01"),
+      x = as.POSIXct(dataSummary$plotData[["Fecha"]], origin = "1970-01-01"),
       xtype = 'date',
-      y = dataSummary$plotData[['Estacion']],
-      smoothing = 1
+      y = as.character(dataSummary$plotData[['Estacion']])
     )
+    layout(p, title = paste("Disponibilidad de datos agregado diario para",database$currentData),
+           xaxis = list(title = "Tiempo"))
   })
 }
