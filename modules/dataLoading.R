@@ -2,9 +2,8 @@
 
 dataLoadingUI <- function(id, label = "Data Loading") {
   ns <- NS(id)
-  navbarPage(
-    "Reporte de datos",
-    tabPanel("Carga de datos",
+  sidebarLayout(
+    sidebarPanel(
              actionButton(ns('Delete'),"Borrar Actual"),
              radioButtons(ns("desiredFormat"), "Por favor elija el formato de sus datos",
                           choices = c("Documento por contaminante" = 1,"Documento por estacion" = 2 ),
@@ -14,7 +13,7 @@ dataLoadingUI <- function(id, label = "Data Loading") {
                        accept=c('text/csv','.csv')),
              selectInput(ns('database'), "Seleccione contaminante", c( "PM2.5" =2,"PM10"=1)),
              actionButton(ns('add'),"Agregar")),
-    tabPanel("Visualizacion de datos",
+    mainPanel(
              selectInput(ns("dataBase"), label = h3("Seleccione una base datos"), 
                          choices = list("Ninguna" = 0, "PM2.5" = 1, "PM10" = 2), 
                          selected = 1),
@@ -56,10 +55,10 @@ dataLoading <- function(input, output, session) {
         data = read.csv(file$datapath,sep = ";", stringsAsFactors = F)
         if(input$database == 1){
           newData = as.list(database$datapm10)
-          newData["Fecha...Hora"] = as.character(data[,1])
+          newData[["Fecha...Hora"]] = as.character(data[,1])
           newData[input$StationName] = data['PM10']
           database$datapm10 = as.data.frame(newData)
-          database$datapm10[["Fecha...Hora"]] = as.POSIXct(as.character(database$datapm10["Fecha...Hora"]), format="%m/%d/%Y %H:%M")
+          database$datapm10["Fecha...Hora"] = as.POSIXct(database$datapm10[["Fecha...Hora"]], format="%d/%m/%Y %H:%M")
           database$data = database$datapm10
         }
         if(input$database == 2){
