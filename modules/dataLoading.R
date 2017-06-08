@@ -56,15 +56,19 @@ dataLoading <- function(input, output, session) {
         data = read.csv(file$datapath,sep = ";", stringsAsFactors = F)
         if(input$database == 1){
           newData = as.list(database$datapm10)
-          newData["Fecha...Hora"] = as.POSIXct(as.character(data[,1]), format="%m/%d/%Y %H:%M")
+          newData["Fecha...Hora"] = as.character(data[,1])
           newData[input$StationName] = data['PM10']
           database$datapm10 = as.data.frame(newData)
+          database$datapm10[["Fecha...Hora"]] = as.POSIXct(as.character(database$datapm10["Fecha...Hora"]), format="%m/%d/%Y %H:%M")
+          database$data = database$datapm10
         }
         if(input$database == 2){
           newData = as.list(database$datapm2.5)
-          newData["Fecha...Hora"] = as.POSIXct(as.character(data[,1]), format="%d/%m/%Y %H:%M")
+          newData[["Fecha...Hora"]] = as.character(data[,1])
           newData[input$StationName] = data['PM2.5']
           database$datapm2.5 = as.data.frame(newData)
+          database$datapm2.5["Fecha...Hora"] = as.POSIXct(database$datapm2.5[["Fecha...Hora"]], format="%d/%m/%Y %H:%M")
+          database$data = database$datapm2.5
         }
       }
     })

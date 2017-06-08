@@ -60,16 +60,18 @@ dataCleaning <- function(input, output, session, database){
     
   # This method change the current database when the user change it
   changeCurrentDataBase <- observe({
+    database[['datapm2.5']]
+    database[['datapm10']]
     if(input$dataBase == 1){
       isolate({
         database$currentData = 'pm2.5'
         database[['data']] = database[['datapm2.5']]
         # Update Tables
-        rulesSummarydf = data.frame(Estaciones = colnames(database[['data']])[2:12])
+        rulesSummarydf = data.frame(Estaciones = colnames(database[['data']])[-1])
         for(i in 1:6){
-          rulesSummarydf[paste("Regla ",i)] = rep(0,11)
+          rulesSummarydf[paste("Regla ",i)] = rep(0,length(database[['data']])-1)
         }
-        rulesSummarydf["Datos validos"] = rep(1,11)
+        rulesSummarydf["Datos validos"] = rep(1,length(database[['data']])-1)
       
         rulesSummary$data = rulesSummarydf
         rulesSummary$rulesMatrix = array(0,dim = isolate(c(6,length(database[['data']])-1,nrow(database[['data']]))))
@@ -81,11 +83,11 @@ dataCleaning <- function(input, output, session, database){
         database$currentData = 'pm10'
         database[['data']] = database[['datapm10']]
         # Update tables
-        rulesSummarydf = isolate(data.frame(Estaciones = colnames(database[['data']])[2:19]))
+        rulesSummarydf = isolate(data.frame(Estaciones = colnames(database[['data']])[-1]))
         for(i in 1:6){
-          rulesSummarydf[paste("Regla ",i)] = rep(0,18)
+          rulesSummarydf[paste("Regla ",i)] = rep(0,length(database[['data']])-1)
         }
-        rulesSummarydf["Datos validos"] = rep(1,18)
+        rulesSummarydf["Datos validos"] = rep(1,length(database[['data']])-1)
         rulesSummary$data = rulesSummarydf
         rulesSummary$rulesMatrix = array(0,dim = isolate(c(6,length(database[['data']])-1,nrow(database[['data']]))))
         rulesSummary$rulesApplied = NULL
@@ -207,7 +209,7 @@ dataCleaning <- function(input, output, session, database){
     striped = TRUE)
   
   output$summary = renderPrint({
-    summary(database[['data']][,2:12])
+    summary(database[['data']][,-1])
   })
   
   output$plot <- renderPlotly({
