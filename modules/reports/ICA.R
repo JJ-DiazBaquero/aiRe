@@ -103,8 +103,6 @@ ICA <- function(input, output, session, database){
           layout <- layout(p, title = paste("Indicador de Calidad del Aire (ICA) para", database$currentData))
         })
 
-        browser()
-        
         output$daysOver <- renderPlotly({
           p = plot_ly(
             x = names(database[['data']])[-c(1)],
