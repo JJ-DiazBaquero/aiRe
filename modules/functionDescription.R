@@ -7,7 +7,7 @@ descriptionUI <- function(id){
   tabsetPanel(
     tabPanel("Carga de datos", uiOutput(ns("data_loading"))),
     tabPanel("Limpieza de datos", uiOutput(ns("data_cleaning"))),
-    tabPanel("Análisis de datos", uiOutput(ns("data_analysis"))),
+    tabPanel("Analisis de datos", uiOutput(ns("data_analysis"))),
     tabPanel("Reportes", uiOutput(ns("reports"))),
     tabPanel("Cuadro de control", uiOutput(ns("dashboard")))
     

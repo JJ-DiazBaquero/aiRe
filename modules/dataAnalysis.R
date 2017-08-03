@@ -1,6 +1,6 @@
 source("modules/dataAnalysis/dataAvailability.R")
 source("modules/dataAnalysis/comparativeAnalysis.R")
-
+source("modules/dataAnalysis/excedenceAnalysis.R")
 dataAnalysisUI <- function(id) {
   ns <- NS(id)
   navbarPage(
@@ -9,12 +9,13 @@ dataAnalysisUI <- function(id) {
              dataAvailabilityUI(ns("dataAvailability"))),
     tabPanel("Analisis comparativos",
              comparativeAnalysisUI(ns("comparativeAnalysis"))),
-    tabPanel("Pronosticos (*)")
+    tabPanel("Dias de excedencia",
+             excedenceAnalysisUI(ns("excedenceAnalysis")))
   )
 }
 dataAnalysis <- function(input, output, session, database){
   controllerAvailability <- callModule(dataAvailability, "dataAvailability", database = database)
   controllerComparativeAnalysis <- callModule(comparativeAnalysis, "comparativeAnalysis", database = database)
-  
+  controllerExcedenceAnalysis <- callModule(excedenceAnalysis, "excedenceAnalysis", database = database)
 }
   
