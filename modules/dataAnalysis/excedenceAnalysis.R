@@ -58,7 +58,8 @@ excedenceAnalysis <- function(input, output, session, database) {
     p <- plot_ly(x = stations,y = excedenceDays, type = "bar", name = "Dias que exceden la norma")
     p <- add_trace(p, y = noDataDays,type = "bar", name = "Dias sin informacion")
     layout(p, barmode = 'stack', 
-           title = paste("Numero de dias que exceden la norma por estacion","en",input$yearSelected,"para",database$currentData))
+           title = paste("Numero de dias que exceden la norma por estacion","en",input$yearSelected,"para",database$currentData),
+           yaxis = list(title = "Dias"))
     
   })
   
