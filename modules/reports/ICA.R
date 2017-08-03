@@ -3,7 +3,7 @@ ICAUI <- function(id){
   ns <- NS(id)
   titlePanel("Indicador ICA")
   fluidPage(
-    actionButton(ns("recalculateMatrix"),"Recalcular Matriz"),
+    actionButton(ns("recalculateMatrix"),"Calcular indice"),
     plotlyOutput(ns("heatMapICA")),
     plotlyOutput(ns("daysOver"))
   )

@@ -3,7 +3,7 @@ dataAvailabilityUI <- function(id) {
   ns <- NS(id)
   titlePanel("Disponibilidad de datos")
   fluidPage(title = "Disponibilidad de datos",
-            actionButton(ns("recalculateMatrix"),"Recalcular Matriz"),
+            actionButton(ns("recalculateMatrix"),"Calcular disponibilidad de datos"),
             plotlyOutput(ns("heatMap")))
 }
 
