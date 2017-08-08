@@ -9,7 +9,7 @@ descriptionUI <- function(id){
              fluidRow(
                column(4,
                       h4("Descripcion:"),
-                      p("Esta herramienta de software permite realizar analisis sobre datos de calidad de aire, da facilidades de limpieza de datos, analisis de disponibilidad de datos, analisis comparativos de tiempo y sobre indicadores de calidad de aire"),
+                      p("Esta herramienta de software permite realizar analisis sobre datos de calidad de aire, da facilidades de limpieza de datos, analisis de disponibilidad de datos, analisis comparativos de tiempo y analisis de indicadores de calidad de aire"),
                       hr(),
                       tags$i("Version: 1.1")
                       
@@ -28,8 +28,8 @@ descriptionUI <- function(id){
                       tags$ul(
                         tags$li(a(href = "mailto:jj.diaz1067@uniandes.edu.co", "Juan Jose Diaz Baquero: jj.diaz1067@uniandes.edu.co")),
                         tags$li(a(href = "n.rojas13@uniandes.edu.co", "Nicolas Rojas: n.rojas13@uniandes.edu.co")),
-                        tags$li(a(href = "i.mura@uniandes.edu.co", "Ivan Mura: i.mura@uniandes.edu.co")),
-                        tags$li(a(href = "jffranco@uniandes.edu.co", "Juan Felipe Franco: jffranco@uniandes.edu.co"))                        
+                        tags$li(a(href = "jffranco@uniandes.edu.co", "Juan Felipe Franco: jffranco@uniandes.edu.co")),                        
+                        tags$li(a(href = "i.mura@uniandes.edu.co", "Ivan Mura: i.mura@uniandes.edu.co"))
                       )
                )
              )),

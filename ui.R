@@ -16,7 +16,7 @@ source("modules/reports.R")
 # "<img src='University_of_Los_Andes_logo.svg' height = 70 align=right style= 'position:relative; z-index:-1; right:0;padding-right: 0px;' />"
 # Define UI for application that draws a histogram
 shinyUI(
-  navbarPage(title = "Herramienta de analiis de datos de calidad de aire",
+  navbarPage(title = "Herramienta de análisis de datos de calidad de aire",
   windowTitle = "Proyecto de calidad de aire",inverse = T,
   tabPanel("Descripción", 
            descriptionUI("functionDescription"),

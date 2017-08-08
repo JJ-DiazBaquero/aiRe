@@ -60,8 +60,6 @@ dataCleaning <- function(input, output, session, database){
     
   # This method change the current database when the user change it
   changeCurrentDataBase <- observe({
-    database[['datapm2.5']]
-    database[['datapm10']]
     if(input$dataBase == 1){
       isolate({
         database$currentData = 'pm2.5'
@@ -98,108 +96,108 @@ dataCleaning <- function(input, output, session, database){
   applyRules <- observe({
     input$applyRulesBtn
     isolate({
-    progress <- Progress$new(session, min = 0, max = length(input$generalRules))
-    on.exit(progress$close())
-    progress$set(message = "Aplicando reglas", value = 0)
-    # Rule 1 is remove all strings, here we coerce all values to numeric
-    if(1 %in% isolate(input$generalRules) && !(1 %in% rulesSummary$rulesApplied)){
-      progress$set(0, detail="Regla 1")
-      #Encontrar todos los valores de string diferentes en la columna para asi quedar con solo números
-      cat("Applying rule 1 \n")
-      rule1Array = c(rep(0,nrow(database[['data']])))
-      for(i in 2:length(database[['data']])){
-        lvlsStr = levels(database[['data']][,i])
-        lvlsInt = as.double(gsub(",",".",lvlsStr))
-        strList = lvlsStr[is.na(lvlsInt)]
-        rule1Array[database[['data']][,i] %in% strList] = TRUE
-        database[['data']][rule1Array == 1,i] = NA
-        database[['data']][,i] = as.numeric(gsub(",",".",database[['data']][,i]))
-        database[['data']][is.nan(database[['data']][,i]),i] = NA
-        rulesSummary$data[i-1,2] = sum(rule1Array)/nrow(database[['data']])
-        rulesSummary$data[i-1,8] = 1- sum(rulesSummary$data[i-1,2:7])
-        rulesSummary$rulesMatrix[1,i-1,] = rule1Array
-        rule1Array[TRUE]=0
+      progress <- Progress$new(session, min = 0, max = length(input$generalRules))
+      on.exit(progress$close())
+      progress$set(message = "Aplicando reglas", value = 0)
+      # Rule 1 is remove all strings, here we coerce all values to numeric
+      if(1 %in% isolate(input$generalRules) && !(1 %in% rulesSummary$rulesApplied)){
+        progress$set(0, detail="Regla 1")
+        #Encontrar todos los valores de string diferentes en la columna para asi quedar con solo números
+        cat("Applying rule 1 \n")
+        rule1Array = c(rep(0,nrow(database[['data']])))
+        for(i in 2:length(database[['data']])){
+          lvlsStr = levels(database[['data']][,i])
+          lvlsInt = as.double(gsub(",",".",lvlsStr))
+          strList = lvlsStr[is.na(lvlsInt)]
+          rule1Array[database[['data']][,i] %in% strList] = TRUE
+          database[['data']][rule1Array == 1,i] = NA
+          database[['data']][,i] = as.numeric(gsub(",",".",database[['data']][,i]))
+          database[['data']][is.nan(database[['data']][,i]),i] = NA
+          rulesSummary$data[i-1,2] = sum(rule1Array)/nrow(database[['data']])
+          rulesSummary$data[i-1,8] = 1- sum(rulesSummary$data[i-1,2:7])
+          rulesSummary$rulesMatrix[1,i-1,] = rule1Array
+          rule1Array[TRUE]=0
+        }
+        rulesSummary$rulesApplied[1] = 1
       }
-      rulesSummary$rulesApplied[1] = 1
-    } 
-    # Rule 2 is remove all observations with 0 or negative values
-    if(2 %in% isolate(input$generalRules) && !(2 %in% rulesSummary$rulesApplied)){
-      progress$inc(1, detail="Regla 2")
-      cat("\n Applying rule 2 \n")
-      #cat(summary(database))
-      #Quitar todos los 0's o negativos
-      rule2Array = c(rep(0,nrow(database[['data']])))
-      for(i in 2:length(database[['data']])){
-        rule2Array[database[['data']][,i] <= 0] = TRUE
-        database[['data']][rule2Array == 1,i] = NA
-        rulesSummary$data[i-1,3] = sum(rule2Array)/nrow(database[['data']])
-        rulesSummary$data[i-1,8] = 1- sum(rulesSummary$data[i-1,2:7])
-        rulesSummary$rulesMatrix[2,i-1,] = rule2Array
-        
-        rule2Array[TRUE] = 0
+      # Rule 2 is remove all observations with 0 or negative values
+      if(2 %in% isolate(input$generalRules) && !(2 %in% rulesSummary$rulesApplied)){
+        progress$inc(1, detail="Regla 2")
+        cat("\n Applying rule 2 \n")
+        #cat(summary(database))
+        #Quitar todos los 0's o negativos
+        rule2Array = c(rep(0,nrow(database[['data']])))
+        for(i in 2:length(database[['data']])){
+          rule2Array[database[['data']][,i] <= 0] = TRUE
+          database[['data']][rule2Array == 1,i] = NA
+          rulesSummary$data[i-1,3] = sum(rule2Array)/nrow(database[['data']])
+          rulesSummary$data[i-1,8] = 1- sum(rulesSummary$data[i-1,2:7])
+          rulesSummary$rulesMatrix[2,i-1,] = rule2Array
+          
+          rule2Array[TRUE] = 0
+        }
+        rulesSummary$rulesApplied[2] = 2
       }
-      rulesSummary$rulesApplied[2] = 2
-    }
-    # Rule 3 is remove obervations below maquine deteccion limit
-    if(3 %in% isolate(input$generalRules) && !(3 %in% rulesSummary$rulesApplied)){
-      progress$inc(1, detail="Rule 3")
-      cat("\n Applying rule 3 \n")
-      # cat(summary(database))
-      # Quitar todos los valores inferiores a 1
-      rule3Array = c(rep(0,nrow(database[['data']])))
-      for(i in 2:length(database[['data']])){
-        rule3Array[database[['data']][,i] <= 1] = TRUE
-        database[['data']][rule3Array == 1,i] = NA
-        rulesSummary$data[i-1,4] = sum(rule3Array)/nrow(database[['data']])
-        rulesSummary$data[i-1,8] = 1- sum(rulesSummary$data[i-1,2:7])
-        rulesSummary$rulesMatrix[3,i-1,] = rule3Array
-        rule3Array[TRUE] = 0
+      # Rule 3 is remove obervations below maquine deteccion limit
+      if(3 %in% isolate(input$generalRules) && !(3 %in% rulesSummary$rulesApplied)){
+        progress$inc(1, detail="Rule 3")
+        cat("\n Applying rule 3 \n")
+        # cat(summary(database))
+        # Quitar todos los valores inferiores a 1
+        rule3Array = c(rep(0,nrow(database[['data']])))
+        for(i in 2:length(database[['data']])){
+          rule3Array[database[['data']][,i] <= 1] = TRUE
+          database[['data']][rule3Array == 1,i] = NA
+          rulesSummary$data[i-1,4] = sum(rule3Array)/nrow(database[['data']])
+          rulesSummary$data[i-1,8] = 1- sum(rulesSummary$data[i-1,2:7])
+          rulesSummary$rulesMatrix[3,i-1,] = rule3Array
+          rule3Array[TRUE] = 0
+        }
+        rulesSummary$rulesApplied[3] = 3
       }
-      rulesSummary$rulesApplied[3] = 3
-    }
-    # Rule 4 is ensure PM10 > PM25 and viceversa
-    if(4 %in% isolate(input$particularRules) && !(4 %in% rulesSummary$rulesApplied)){
-      progress$inc(1, detail="Regla 4")
-      cat("\n Applying regla 4 \n")
-      rule4Array = c(rep(0,nrow(database[['data']])))
-      for(i in colnames(database[['data']])[-1]){
-        # ensure pm25 < pm10 (selected database[['datapm2.5']])
-        if(input$dataBase == 1){
-          for (j in colnames(database[['datapm10']])[-1]){
-            if(i == j){
-              rule4Array[database[['data']][i] - database[['datapm10']][j] >= 0] = TRUE
-              database[['data']][rule4Array == TRUE,i] = NA
-              rulesSummary$data[which(colnames(database[['data']]) == i)-1,5] = sum(rule4Array)/nrow(database[['data']])
-              rulesSummary$data[which(colnames(database[['data']]) == i)-1,8] = 1- sum(rulesSummary$data[i,2:7])
-              rulesSummary$rulesMatrix[4,which(colnames(database[['data']]) == i)-1,] = rule4Array
-              rule4Array[TRUE] = 0
+      # Rule 4 is ensure PM10 > PM25 and viceversa
+      if(4 %in% isolate(input$particularRules) && !(4 %in% rulesSummary$rulesApplied)){
+        progress$inc(1, detail="Regla 4")
+        cat("\n Applying regla 4 \n")
+        rule4Array = c(rep(0,nrow(database[['data']])))
+        for(i in colnames(database[['data']])[-1]){
+          # ensure pm25 < pm10 (selected database[['datapm2.5']])
+          if(input$dataBase == 1){
+            for (j in colnames(database[['datapm10']])[-1]){
+              if(i == j){
+                rule4Array[database[['data']][i] - database[['datapm10']][j] >= 0] = TRUE
+                database[['data']][rule4Array == TRUE,i] = NA
+                rulesSummary$data[which(colnames(database[['data']]) == i)-1,5] = sum(rule4Array)/nrow(database[['data']])
+                rulesSummary$data[which(colnames(database[['data']]) == i)-1,8] = 1- sum(rulesSummary$data[i,2:7])
+                rulesSummary$rulesMatrix[4,which(colnames(database[['data']]) == i)-1,] = rule4Array
+                rule4Array[TRUE] = 0
+              }
+            }
+          }
+          # ensure pm10 > pm2.5
+          else if (input$dataBase == 2){
+            for (j in colnames(database[['datapm2.5']])[-1]){
+              if(i == j){
+                rule4Array[database[['data']][i] - database[['datapm2.5']][j] <= 0] = TRUE
+                database[['data']][rule4Array == TRUE,i] = NA
+                rulesSummary$data[which(colnames(database[['data']]) == i)-1,5] = sum(rule4Array)/nrow(database[['data']])
+                rulesSummary$data[which(colnames(database[['data']]) == i)-1,8] = 1- sum(rulesSummary$data[i,2:7])
+                rulesSummary$rulesMatrix[4,which(colnames(database[['data']]) == i)-1,] = rule4Array
+                rule4Array[TRUE] = 0
+              }
             }
           }
         }
-        # ensure pm10 > pm2.5
-        else if (input$dataBase == 2){
-          for (j in colnames(database[['datapm2.5']])[-1]){
-            if(i == j){
-              rule4Array[database[['data']][i] - database[['datapm2.5']][j] <= 0] = TRUE
-              database[['data']][rule4Array == TRUE,i] = NA
-              rulesSummary$data[which(colnames(database[['data']]) == i)-1,5] = sum(rule4Array)/nrow(database[['data']])
-              rulesSummary$data[which(colnames(database[['data']]) == i)-1,8] = 1- sum(rulesSummary$data[i,2:7])
-              rulesSummary$rulesMatrix[4,which(colnames(database[['data']]) == i)-1,] = rule4Array
-              rule4Array[TRUE] = 0
-            }
-          }
-        }
+        rulesSummary$rulesApplied[4] = 4
       }
-      rulesSummary$rulesApplied[4] = 4
-    }
-    # Update changes in database
-    progress$inc(1, detail="Update Database")
-    if(input$dataBase == 1){
-      database[['datapm2.5']] = database[['data']]
-    }
-    else if (input$dataBase == 2){
-      database[['datapm10']] = database[['data']] 
-    }
+      # Update changes in database
+      progress$inc(1, detail="Update Database")
+      if(input$dataBase == 1){
+        database[['datapm2.5']] = database[['data']]
+      }
+      else if (input$dataBase == 2){
+        database[['datapm10']] = database[['data']] 
+      }
     })
   })
   
@@ -215,7 +213,7 @@ dataCleaning <- function(input, output, session, database){
   output$plot <- renderPlotly({
     progress <- Progress$new(session)
     on.exit(progress$close())
-
+    
     progress$set(message = "Generando grafico", value = 0)
     
     input$dateRange
@@ -225,11 +223,9 @@ dataCleaning <- function(input, output, session, database){
       timeInterval = seq.POSIXt(from=date1, to=date2, by="hour")
     } else
       timeInterval = c(1,2,3)
-      
+    
     #to many obs, need to subcript by each rule
     dataSubset = rulesSummary$rulesMatrix[,,which(database[['data']][,1] %in% timeInterval)]
-    cat("Length of timeInterval")
-    cat(length(which(database[['data']][,1] %in% timeInterval)))
     database[['data']]
     #Recalculate matrix of percentage by row (each rule)
     for(i in 1:6){
