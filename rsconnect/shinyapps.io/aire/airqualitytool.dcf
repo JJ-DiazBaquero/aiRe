@@ -1,0 +1,10 @@
+name: airqualitytool
+title:
+username:
+account: aire
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 208624
+bundleId: 968238
+url: https://aire.shinyapps.io/airqualitytool/
+when: 1504624849.72735

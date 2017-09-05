@@ -234,10 +234,10 @@ dataCleaning <- function(input, output, session, database){
     rulesSummary$data[,8] = 1 - rowSums(rulesSummary$data[,2:7])
     
     plotRules = plot_ly(x = rulesSummary$data[,1], y = rulesSummary$data[,8], name = "Porcentaje validos",type = "bar")
-    rule1 <- add_trace(plotRules , x = rulesSummary$data[,1], y = rulesSummary$data[,2], name = "Regla 1", type = "bar")
-    rule2 <- add_trace(rule1 , x = rulesSummary$data[,1], y = rulesSummary$data[,3], name = "Regla 2", type = "bar")
-    rule3 <- add_trace(rule2 , x = rulesSummary$data[,1], y = rulesSummary$data[,4], name = "Regla 3", type = "bar")
-    rule4 <- add_trace(rule3 , x = rulesSummary$data[,1], y = rulesSummary$data[,5], name = "Regla 4", type = "bar")
+    rule1 <- add_trace(plotRules , x = rulesSummary$data[,1], y = rulesSummary$data[,2], name = "Caracteres", type = "bar")
+    rule2 <- add_trace(rule1 , x = rulesSummary$data[,1], y = rulesSummary$data[,3], name = "Valores negativos", type = "bar")
+    rule3 <- add_trace(rule2 , x = rulesSummary$data[,1], y = rulesSummary$data[,4], name = "Limite deteccion", type = "bar")
+    rule4 <- add_trace(rule3 , x = rulesSummary$data[,1], y = rulesSummary$data[,5], name = "Valoracion cruzada", type = "bar")
     progress$inc(1)
     layout <- layout(rule4, barmode = "stack", title = paste("Porcentaje de datos en cada regla entre",input$dateRange[1],"y",input$dateRange[2]), 
                      xaxis = list(title = ""), 
