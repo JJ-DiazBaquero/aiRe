@@ -14,11 +14,19 @@ timeSeriesUI <- function(id){
 timeSeries <- function(input, output, session, database){
   ns <- session$ns
   output$timeSeries <- renderPlotly({
+    progress <- Progress$new(session, min  = 0, max = 3)
+    progress$set(message="Series de tiempo",value =0)
+    on.exit(progress$close())
+    
+    progress$inc(amount = 1, message = "Recuperando datos", detail = NULL)
+    
     temporality = switch(input$AgregationLevel, '1' = 'hour', '2' = 'day', '3' = 'week', '4' = 'month', '5' = 'quarter', '6' = 'year')
     temporalidad = switch(input$AgregationLevel, '1' = 'hora', '2' = 'dia', '3' = 'semana', '4' = 'mes', '5' = 'trimestre', '6' = 'anio')
     dataToAvg = data.frame(date = database[['data']][,1],
                            var = database[['data']][,which(colnames(database[['data']])==input$selectedStation)])
+    progress$inc(amount = 1, message = "Calculando agregacion", detail = NULL)
     dataAvged = timeAverage(dataToAvg, avg.time = temporality, interval = "hour")
+    progress$inc(amount = 1, message = "Construyendo grafico", detail = NULL)
     p = plot_ly(x = dataAvged$date,y = dataAvged$var,
                 type = 'scatter', mode = 'lines')
     p <- layout(p, title = paste("Promedio",temporalidad,"de",database$currentData,"en", input$selectedStation), 
