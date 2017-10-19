@@ -34,12 +34,23 @@ dataLoading <- function(input, output, session) {
       }
     })
   })
-  
+  # Database is an object with the following atributes
+  # datapm10: dataframe with the pm10 data
+  # datapm2.5: dataframe with the pm2.5 data
+  # data: dataframe with the current data the system is working with
+  # currentData: name of the data currently loades in data 
+  # dataType: named array with databases name and it's type: auto' or 'manual' according of the type of the data, NA if this value has not been set
   database <- reactiveValues(datapm10 = read.csv("databases/PM10_CAR2010.csv", sep=";", row.names=NULL, stringsAsFactors=TRUE),
                              datapm2.5 = read.csv("databases/PM2.5_1998_2016_Encsv.csv", sep=";", row.names=NULL, stringsAsFactors=TRUE),
-                             data = NULL)
+                             data = NULL,
+                             dataType = c(pm10 = NA, pm2.5 = NA))
   database[['data']] <- database[['datapm2.5']]
   database$currentData = 'pm2.5'
+  
+  #TODO Change this when the database changes
+  database$dataType['pm10'] = 'manual'
+  database$dataType['pm2.5'] = 'auto'
+  
   
   changeDatabase <- observe({
     input$add
