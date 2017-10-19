@@ -109,6 +109,7 @@ trends <- function(input, output, session, database){
       ag$hour = as.numeric(as.character(ag$hour))
       ag$year = as.numeric(as.character(ag$year))
       
+      
       g = plot_ly(ag, x = ~hour, y = ~mean, frame = ~year,
                   type ="scatter", mode="lines",
                   line = list(color = 'rgba(7, 164, 181, 1)'),

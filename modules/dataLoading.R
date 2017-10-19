@@ -35,7 +35,7 @@ dataLoading <- function(input, output, session) {
     })
   })
   
-  database <- reactiveValues(datapm10 = read.csv("databases/PM10_1998_2016_Encsv.csv", sep=";", row.names=NULL, stringsAsFactors=TRUE),
+  database <- reactiveValues(datapm10 = read.csv("databases/PM10_CAR2010.csv", sep=";", row.names=NULL, stringsAsFactors=TRUE),
                              datapm2.5 = read.csv("databases/PM2.5_1998_2016_Encsv.csv", sep=";", row.names=NULL, stringsAsFactors=TRUE),
                              data = NULL)
   database[['data']] <- database[['datapm2.5']]
@@ -80,7 +80,7 @@ dataLoading <- function(input, output, session) {
   changeDates <- observe({
     isolate({
       database$datapm2.5[,1] = as.POSIXct(as.character(database$data[,1]), format="%d/%m/%Y %H:%M")
-      database$datapm10[,1] = as.POSIXct(as.character(database$datapm10[,1]), format="%m/%d/%Y %H:%M")
+      database$datapm10[,1] = as.POSIXct(as.character(database$datapm10[,1]), format="%d/%m/%Y %H:%M")
       database$data = database$datapm2.5[,1]
       database$currentData = 'pm2.5'
     })  

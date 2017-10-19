@@ -5,8 +5,8 @@ account: aire
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 208624
-bundleId: 993362
+bundleId: 1001929
 url: https://aire.shinyapps.io/airqualitytool/
-when: 1506116475.93851
+when: 1506612971.33204
 asMultiple: FALSE
 asStatic: FALSE
