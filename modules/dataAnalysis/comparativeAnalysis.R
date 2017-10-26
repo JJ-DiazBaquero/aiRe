@@ -68,7 +68,10 @@ comparativeAnalysisUI <- function(id) {
              ),
     tabPanel("Graficos",
              plotlyOutput(ns("boxplot")),
-             plotlyOutput(ns("scatterplot")))
+             hr(),
+             h2("Analisis de valores atipicos"),
+             uiOutput(ns("outliersUI")))
+
   )
 }
 
@@ -224,6 +227,37 @@ comparativeAnalysis <- function(input, output, session, database) {
     p
   })
   
+  
+  output$dataTableOutliers <- renderDataTable({
+    if(is.null(input$selectOutliersRange))return(NULL)
+    if(is.null(input$selectStation))return(NULL)
+    
+    info = NULL
+    #Check if we need all intervalsData
+    if(input$selectOutliersRange == 4){
+      for(i in 1:3){
+        if(input[[paste("use",i,sep="")]] == TRUE){
+          info = rbind(info, reactiveData$intervalData[[i]])
+        }
+      }
+      dates = rep(info[colnames(info)[1]],length(input$selectStation))
+      info = stack(info, select = input$selectStation)
+      info$date = dates[[1]]
+    }else{
+      info = reactiveData$intervalData[[as.numeric(input$selectOutliersRange)]]
+      dates = rep(info[colnames(info)[1]],length(input$selectStation))
+      info = stack(info, select = input$selectStation)
+      info$date = dates[[1]]
+    }
+    
+    #Get outliers
+    vals <- boxplot(x = info$values)
+    outliers = vals$out
+    fechasOuts = info[info$values %in% outliers,]
+    colnames(fechasOuts) = c("Concentración", "Estacion", "Fecha")
+    fechasOuts
+  })
+  
   #output$scatterplot <- renderPlotly({
   #  p = plot_ly(x = input$stations, type = "scatter", visible = FALSE)
   #  for(i in 1:3){
@@ -304,6 +338,23 @@ comparativeAnalysis <- function(input, output, session, database) {
                        choices = colnames(database[['data']])[-1],
                        selected = colnames(database[['data']])[-1],
                        inline = TRUE
+    )
+  })
+  
+  output$outliersUI <- renderUI({
+    if(is.null(input$stations)) return(NULL)
+
+    tagList(
+    radioButtons(ns("selectOutliersRange"), "Seleccione un rango:",
+                 choiceValues = 1:4,
+                 choiceNames = c(input[[paste("nameRange",1,sep="")]],
+                                 input[[paste("nameRange",2,sep="")]], 
+                                 input[[paste("nameRange",3,sep="")]], "Todos")  ,inline = TRUE),
+    
+    checkboxGroupInput(ns("selectStation"), "Seleccione una estacion:",
+    c(input$stations), inline = TRUE),
+    
+    dataTableOutput(ns("dataTableOutliers"))
     )
   })
 }
