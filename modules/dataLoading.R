@@ -8,11 +8,10 @@ dataLoadingUI <- function(id, label = "Data Loading") {
              radioButtons(ns("desiredFormat"), "Por favor elija el formato de sus datos",
                           choices = c("Documento por contaminante" = 1,"Documento por estacion" = 2 ),
                           selected = 1, inline = FALSE),
-             textInput(ns('StationName'), "Nombre de la estacion"),
-             fileInput(ns('file'), 'Por favor suba un archivo CSV',
-                       accept=c('text/csv','.csv')),
-             selectInput(ns('database'), "Seleccione contaminante", c( "PM2.5" =2,"PM10"=1)),
-             actionButton(ns('add'),"Agregar")),
+             radioButtons(ns("temporality"), "Por favor elija la perioricidad de sus datos",
+                          choices = c("Automatica (horaria)" = 1,"Manual" = 2 ),
+                          selected = 1, inline = FALSE),
+             uiOutput(ns('optionsUI'))),
     mainPanel(
              selectInput(ns("dataBase"), label = h3("Seleccione una base datos"), 
                          choices = list("Ninguna" = 0, "PM2.5" = 1, "PM10" = 2), 
@@ -57,7 +56,12 @@ dataLoading <- function(input, output, session) {
     isolate({
       #Document per contaminant
       if(input$desiredFormat == 1){
-        #TODO
+        if(input$database == 1){
+          database$datapm10 = read.csv(file$datapath, sep=";", row.names=NULL, stringsAsFactors=TRUE)
+          database$datapm10["Fecha...Hora"] = as.POSIXct(database$datapm10[["Fecha...Hora"]], format="%d/%m/%Y %H:%M")
+          database$data = database$datapm10
+          database$currentData = "pm10"
+        }
       }
       if(input$desiredFormat == 2){
         file <- input$file
@@ -73,6 +77,11 @@ dataLoading <- function(input, output, session) {
           database$datapm10["Fecha...Hora"] = as.POSIXct(database$datapm10[["Fecha...Hora"]], format="%d/%m/%Y %H:%M")
           database$data = database$datapm10
           database$currentData = "pm10"
+          if(temporality== 1){
+            database$dataType['pm10'] = 'auto'
+          } else{
+            database$dataType['pm10'] = 'manual'
+          }
         }
         if(input$database == 2){
           newData = as.list(database$datapm2.5)
@@ -82,7 +91,14 @@ dataLoading <- function(input, output, session) {
           database$datapm2.5["Fecha...Hora"] = as.POSIXct(database$datapm2.5[["Fecha...Hora"]], format="%d/%m/%Y %H:%M")
           database$data = database$datapm2.5
           database$currentData = "pm2.5"
+          if(temporality== 1){
+            database$dataType['pm2.5'] = 'auto'
+          } else{
+            database$dataType['pm2.5'] = 'manual'
+          }
+ 
         }
+
       }
     })
     
@@ -104,6 +120,26 @@ dataLoading <- function(input, output, session) {
     else if (input$dataBase == 2){
       database$data = database$datapm10
       database$data
+    }
+  })
+  
+  output$optionsUI <- renderUI({
+    ns <- session$ns
+    if(input$desiredFormat == 2){
+      tagList(
+        textInput(ns('StationName'), "Nombre de la estacion"),
+        fileInput(ns('file'), 'Por favor suba un archivo CSV',
+                  accept=c('text/csv','.csv')),
+        selectInput(ns('database'), "Seleccione contaminante", c( "PM2.5" =2,"PM10"=1)),
+        actionButton(ns('add'),"Agregar")
+      )
+    }else{
+      tagList(
+        fileInput(ns('file'), 'Por favor suba un archivo CSV',
+                  accept=c('text/csv','.csv')),
+        selectInput(ns('database'), "Seleccione contaminante", c( "PM2.5" =2,"PM10"=1)),
+        actionButton(ns('add'),"Agregar")
+      )
     }
   })
   return(database)
