@@ -12,6 +12,7 @@ dataAvailability <- function(input, output, session, database) {
   calcAvailavility <- observe({
     input$recalculateMatrix
     isolate({
+      if(input$recalculateMatrix == 0) return(NULL)
       progress <- Progress$new(session, min  = 2, max = length(database[['data']]))
       progress$set(message="Analisis de datos - Matriz de disponibilidad",value =2)
       on.exit(progress$close())
@@ -34,16 +35,61 @@ dataAvailability <- function(input, output, session, database) {
     })
   })
   output$heatMap <- renderPlotly({
-    #This command removes any NaN value that may exist in the data
-    dataSummary$plotData[is.nan(dataSummary$plotData[,2]),2] = 0
-    p = plot_ly(
-      z = dataSummary$plotData[['Mean']],
-      type = "heatmap",
-      x = as.POSIXct(dataSummary$plotData[["Fecha"]], origin = "1970-01-01"),
-      xtype = 'date',
-      y = as.character(dataSummary$plotData[['Estacion']])
-    )
-    layout(p, title = paste("Disponibilidad de datos agregado diario para",database$currentData),
-           xaxis = list(title = "Tiempo"))
+    if(input$recalculateMatrix == 0) return(NULL)
+    #Check type of data
+    if(database$dataType[database$currentData] == 'auto'){
+      
+      # estations = c("Cade Energia", "Carvajal","Cazuca","Central \n de Mezclas",
+      #                "CAR","Chico.lago \n Sto.Tomas.","Fontibon",
+      #                "Guaymaral","Kennedy","Las Ferias","MinAmbiente","Olaya","Puente \n Aranda",
+      #                "San \n Cristobal","Suba","Tunal","Univ \n Nacional","Usaquen")
+      # estations = unique(as.character(dataSummary$plotData[['Estacion']]))
+      # usarPM10 = c(5,2,10,8,9,11,14,15,16,18,13)
+      
+      # estations = c("Carvajal","CAR","Engativa","Guaymaral","Kennedy","Las Ferias",
+      #    "MinAmbiente","San.Cristobal","Suba","Tunal","Usaquen")
+      # usarPM2.5 = c(2,1,6,4,5,7,8,9,10,11)
+      # estations = unique(as.character(dataSummary$plotData[['Estacion']]))
+      # 
+      # alguna = dataSummary$plotData[dataSummary$plotData$Estacion == "Guaymaral",]
+      # alguna$Mean = rep(0, nrow(alguna))
+      # plot(alguna$Mean)
+      # alguna$Estacion = rep("Puente.Aranda",nrow(alguna))
+      # dataSummary$plotDataEx= rbind(dataSummary$plotData,alguna)
+      # dataSummary$plotDataEx= dataSummary$plotDataEx[dataSummary$plotDataEx$Estacion != "Engativa",]
+      # 
+      # nrow(dataSummary$plotDataEx)
+      # nrow(alguna)
+      # nrow(dataSummary$plotData)
+      
+      #This command removes any NaN value that may exist in the data
+      dataSummary$plotData[is.nan(dataSummary$plotData[,2]),2] = 0
+      p = plot_ly(
+        z = dataSummary$plotData[['Mean']],
+        type = "heatmap",
+        x = as.POSIXct(dataSummary$plotData[["Fecha"]], origin = "1970-01-01"),
+        xtype = 'date',
+        y = as.character(dataSummary$plotData[['Estacion']]),
+        connectgaps = FALSE
+      )
+      layout(p, title = paste("Disponibilidad de datos agregado diario para",database$currentData),
+             xaxis = list(title = "Tiempo"))
+      
+    } else{
+      dataSummary$plotData[is.nan(dataSummary$plotData[,2]),2] = 0
+      
+      color = list()
+      
+      p = plot_ly(
+        z = dataSummary$plotData[['Mean']],
+        type = "heatmap",
+        x = as.POSIXct(dataSummary$plotData[["Fecha"]], origin = "1970-01-01"),
+        xtype = 'date',
+        y = as.character(dataSummary$plotData[['Estacion']]),
+        colorscale = c(c(0, 'lightgray'), c(0.3, 'red'),c(0.6, 'green'),c(1, 'blue'))
+      )
+      layout(p, title = paste("Disponibilidad de datos agregado diario para",database$currentData),
+             xaxis = list(title = "Tiempo"))
+    }
   })
 }
