@@ -75,18 +75,14 @@ dataAvailability <- function(input, output, session, database) {
       layout(p, title = paste("Disponibilidad de datos agregado diario para",database$currentData),
              xaxis = list(title = "Tiempo"))
       
-    } else{
-      dataSummary$plotData[is.nan(dataSummary$plotData[,2]),2] = 0
-      
-      color = list()
-      
+    } else if(database$dataType[database$currentData] == 'manual'){
+      #dataSummary$plotData[is.nan(dataSummary$plotData[,2]),2] = 0
       p = plot_ly(
         z = dataSummary$plotData[['Mean']],
         type = "heatmap",
         x = as.POSIXct(dataSummary$plotData[["Fecha"]], origin = "1970-01-01"),
         xtype = 'date',
-        y = as.character(dataSummary$plotData[['Estacion']]),
-        colorscale = c(c(0, 'lightgray'), c(0.3, 'red'),c(0.6, 'green'),c(1, 'blue'))
+        y = as.character(dataSummary$plotData[['Estacion']])
       )
       layout(p, title = paste("Disponibilidad de datos agregado diario para",database$currentData),
              xaxis = list(title = "Tiempo"))

@@ -150,6 +150,7 @@ comparativeAnalysis <- function(input, output, session, database) {
   #This function search for the data in the selected special date
   calcSpecialDate <- observe({
     input$specialDateSubmit
+    if(input$specialDateSubmit == 0)return(NULL)
     isolate({
       cat("Loading Special dates")
       specialDates = read.csv("databases/SpecialDates.csv", sep=";", row.names=NULL, stringsAsFactors=FALSE, fill = FALSE)
@@ -190,6 +191,8 @@ comparativeAnalysis <- function(input, output, session, database) {
   
   output$specialDateNumObsTable <- renderTable({
     reactiveData$intervalData
+    browser()
+    if(length(obsTable[paste("Rango",i)]) != length(colSums(!is.na(reactiveData$intervalData[[i]]))))return(NULL)
     isolate({
       obsTable = data.frame(Estacion = names(database[['data']]), row.names = "Estacion")
       row.names(obsTable)[1] = "Maximo de observaciones (maximo teorico)"

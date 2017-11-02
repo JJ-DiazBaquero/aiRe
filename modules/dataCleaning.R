@@ -6,10 +6,10 @@ dataCleaningUI <- function(id){
   titlePanel("Limpieza de datos")
   sidebarLayout(
     sidebarPanel(
-      selectInput(ns("dataBase"), label = h3("Seleccione una base de datos"), 
-                  choices = list("PM2.5" = 1, "PM10" = 2), 
-                  selected = 1),
-      hr(),
+      #selectInput(ns("dataBase"), label = h3("Seleccione una base de datos"), 
+      #            choices = list("PM2.5" = 1, "PM10" = 2), 
+      #            selected = 1),
+      #hr(),
       checkboxGroupInput(ns("generalRules"), label = h3("Reglas generales"), 
                          choices = list("1. Restriccion de cadenas de texto" = 1, 
                                         "2. Valores negativos y ceros" = 2, 
@@ -44,11 +44,51 @@ dataCleaning <- function(input, output, session, database){
   #data is the dataframe with the summary of the data per rule in each station 
   #rulesMatrix is the 3 dimensional matrix of 1's and 0's if the data is valid, 1st: Rule, 2nd: Station, 3rd: obs
   #rulesApplied is the historic of rules applied
+  #dataVars is the list with the data for each contaminant type
+  #rulesMatrixVars is the list with the rules matrix for each contaminant type
+  #currentData is the current this module is showing
   rulesSummary <- reactiveValues(data = rulesSummarydf, 
                                  rulesMatrix = array(0,dim = isolate(c(6,length(database[['data']])-1,nrow(database[['data']])))),
-                                 rulesApplied = NULL)
+                                 rulesApplied = NULL,
+                                 dataVars = list(),
+                                 rulesMatrixVars = list(),
+                                 currentData = NULL)
+  #This function observe database$currentData and update current objects 
+  changeCleaningData <- observe({
+    database$currentData
+    database[["data"]]
+    cat(database$currentData)
+    isolate({
+      if(length(database[['data']])<=1)return(NULL)
+      #Check if first run
+      if(is.null(rulesSummary$currentData)){
+        rulesSummary$currentData = database$currentData
+      }
+      
+      #Save current state
+      rulesSummary$dataVars[[rulesSummary$currentData]] = rulesSummary$data
+      rulesSummary$rulesMatrixVars[[rulesSummary$currentData]] = rulesSummary$rulesMatrix
+      
+      #Check if the data does not already exists
+      if(is.null(rulesSummary$dataVars[[database$currentData]])){
+        rulesSummarydf = data.frame(Estaciones = colnames(database[['data']])[-1])
+        for(i in 1:6){
+          rulesSummarydf[paste("Regla ",i)] = rep(0,length(database[['data']])-1)
+        }
+        rulesSummarydf["Datos validos"] = rep(1,length(database[['data']])-1)
+        rulesSummary$data = rulesSummarydf
+        rulesSummary$rulesMatrix = array(0,dim = isolate(c(6,length(database[['data']])-1,nrow(database[['data']]))))
+        rulesSummary$rulesApplied = NULL
+      }else{
+        rulesSummary$data = rulesSummary$dataVars[[database$currentData]]
+        rulesSummary$rulesMatrix = rulesSummary$rulesMatrixVars[[database$currentData]]
+      }
+      rulesSummary$currentData = database$currentData
+    })
+  })
   
   output$uiDateRange <- renderUI({
+    database$currentData
     dateRangeInput(ns("dateRange"), 
                    "Rango de fechas a visualizar", 
                    language = "es", separator = "a", format = "yyyy-mm-dd",
@@ -57,9 +97,10 @@ dataCleaning <- function(input, output, session, database){
                    min = as.character(database[['data']][1,1]), 
                    max = strsplit(as.character(database[['data']][nrow(database[['data']]),1])," ")[[1]][1])
   })
-    
+
   # This method change the current database when the user change it
   changeCurrentDataBase <- observe({
+    if(is.null(input$dataBase)) return()
     if(input$dataBase == 1){
       isolate({
         database$currentData = 'pm2.5'
@@ -95,6 +136,7 @@ dataCleaning <- function(input, output, session, database){
   #This method apply the rules that are selected when the user click on button
   applyRules <- observe({
     input$applyRulesBtn
+    if(input$applyRulesBtn == 0)return(NULL)
     isolate({
       progress <- Progress$new(session, min = 0, max = length(input$generalRules))
       on.exit(progress$close())
@@ -138,7 +180,7 @@ dataCleaning <- function(input, output, session, database){
         }
         rulesSummary$rulesApplied[2] = 2
       }
-      # Rule 3 is remove obervations below maquine deteccion limit
+      # Rule 3 is remove obervations below machuine detection limit
       if(3 %in% isolate(input$generalRules) && !(3 %in% rulesSummary$rulesApplied)){
         progress$inc(1, detail="Rule 3")
         cat("\n Applying rule 3 \n")
@@ -192,17 +234,16 @@ dataCleaning <- function(input, output, session, database){
       }
       # Update changes in database
       progress$inc(1, detail="Update Database")
-      if(input$dataBase == 1){
+      if(database$currentData == "pm2.5"){
         database[['datapm2.5']] = database[['data']]
       }
-      else if (input$dataBase == 2){
+      else if (database$currentData == "pm10"){
         database[['datapm10']] = database[['data']] 
       }
     })
   })
   
   output$rulesTable <-renderTable({
-    database[['data']]
     return(rulesSummary$data)},
     striped = TRUE)
   
@@ -211,22 +252,24 @@ dataCleaning <- function(input, output, session, database){
   })
   
   output$plot <- renderPlotly({
+    rulesSummary$data
     progress <- Progress$new(session)
     on.exit(progress$close())
     
+    if(is.null(input$dateRange))return(NULL)
     progress$set(message = "Generando grafico", value = 0)
     
-    input$dateRange
+    isolate({
+    
     if(!is.null(input$dateRange)){
       date1 = as.POSIXlt(input$dateRange[1],format="%d/%m/%Y %H:%M")
       date2 = as.POSIXlt(input$dateRange[2],format="%d/%m/%Y %H:%M")
       timeInterval = seq.POSIXt(from=date1, to=date2, by="hour")
-    } else
+    }else
       timeInterval = c(1,2,3)
     
     #to many obs, need to subcript by each rule
     dataSubset = rulesSummary$rulesMatrix[,,which(database[['data']][,1] %in% timeInterval)]
-    database[['data']]
     #Recalculate matrix of percentage by row (each rule)
     for(i in 1:6){
       rulesSummary$data[,i+1] = rowSums(rulesSummary$rulesMatrix[i,,which(database[['data']][,1] %in% timeInterval)])/length(which(database[['data']][,1] %in% timeInterval))
@@ -238,10 +281,44 @@ dataCleaning <- function(input, output, session, database){
     rule2 <- add_trace(rule1 , x = rulesSummary$data[,1], y = rulesSummary$data[,3], name = "Valores negativos", type = "bar")
     rule3 <- add_trace(rule2 , x = rulesSummary$data[,1], y = rulesSummary$data[,4], name = "Limite deteccion", type = "bar")
     rule4 <- add_trace(rule3 , x = rulesSummary$data[,1], y = rulesSummary$data[,5], name = "Valoracion cruzada", type = "bar")
-    progress$inc(1)
+    #progress$inc(1)
     layout <- layout(rule4, barmode = "stack", title = paste("Porcentaje de datos en cada regla entre",input$dateRange[1],"y",input$dateRange[2]), 
                      xaxis = list(title = ""), 
                      yaxis = list(title = "Porcentaje de datos"))
+    layout
+    })
+    # estations = c("Cade Energia", "Carvajal","Cazuca","Central \n de Mezclas",
+    #               "CAR","Chico.lago \n Sto.Tomas.","Fontibon",
+    #               "Guaymaral","Kennedy","Las Ferias","MinAmbiente","Olaya","Puente \n Aranda",
+    #               "San \n Cristobal","Suba","Tunal","Univ \n Nacional","Usaquen")
+    # 
+    # usarPM10 = c(5,2,10,8,9,11,14,15,16,18,13)
+    # 
+    # plotRules = plot_ly(x = estations[usarPM10], y = rulesSummary$data[usarPM10,8], name = "Valid data",type = "bar")
+    # rule1 <- add_trace(plotRules, y = rulesSummary$data[usarPM10,2], name = "String data", type = "bar")
+    # rule2 <- add_trace(rule1 , y = rulesSummary$data[usarPM10,3], name = "Negative and zeros", type = "bar")
+    # rule3 <- add_trace(rule2 , y = rulesSummary$data[usarPM10,4], name = "Equipment Limit", type = "bar")
+    # rule4 <- add_trace(rule3 , y = rulesSummary$data[usarPM10,5], name = "PM 2.5 < PM 10", type = "bar")
+    # #progress$inc(1)
+    # layout <- layout(rule4, barmode = "stack", title = "PM 10",
+    #                  xaxis = list(title = "", type = "category"), font = list(size = 11))
+    # layout
+    
+    
+    # estations = c("Carvajal","CAR","Engativa","Guaymaral","Kennedy","Las Ferias",
+    #   "MinAmbiente","San.Cristobal","Suba","Tunal","Usaquen")
+    # usarPM2.5 = c(2,1,6,4,5,7,8,9,10,11)
+    # 
+    # plotRules = plot_ly(x = estations[usarPM2.5], y = rulesSummary$data[usarPM2.5,8], name = "Valid data",type = "bar")
+    # rule1 <- add_trace(plotRules, y = rulesSummary$data[usarPM2.5,2], name = "String data", type = "bar")
+    # rule2 <- add_trace(rule1 , y = rulesSummary$data[usarPM2.5,3], name = "Negative and zeros", type = "bar")
+    # rule3 <- add_trace(rule2 , y = rulesSummary$data[usarPM2.5,4], name = "Equipment Limit", type = "bar")
+    # rule4 <- add_trace(rule3 , y = rulesSummary$data[usarPM2.5,5], name = "PM 2.5 < PM 10", type = "bar")
+    # #progress$inc(1)
+    # layout <- layout(rule4, barmode = "stack", title = "PM 2.5",
+    #                  xaxis = list(title = "", type = "category"), font = list(size = 11))
+    # layout
+
   })
   
   output$downloadData <- downloadHandler(
