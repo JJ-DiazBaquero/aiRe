@@ -7,6 +7,7 @@ dataAnalysisUI <- function(id) {
     "Herramientas de analisis de datos",
     tabPanel("Disponibilidad de datos",
              dataAvailabilityUI(ns("dataAvailability"))),
+    tabPanel("Disponibilidad de datos"),
     tabPanel("Analisis comparativos",
              comparativeAnalysisUI(ns("comparativeAnalysis"))),
     tabPanel("Dias que superan la norma",

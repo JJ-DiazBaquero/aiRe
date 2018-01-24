@@ -2,42 +2,39 @@ library(shiny)
 descriptionUI <- function(id){
   ns <- NS(id)
   
-  h3("Descripción de las funciones")
-  
-  tabsetPanel(
+  navlistPanel(widths = c(3,9),
     tabPanel("Sobre esta herramienta",
              fluidRow(
                column(4,
-                      h4("Descripcion:"),
-                      p("Esta herramienta de software permite realizar analisis sobre datos de calidad de aire, da facilidades de limpieza de datos, analisis de disponibilidad de datos, analisis comparativos de tiempo y analisis de indicadores de calidad de aire"),
+                      h4("Descripción:"),
+                      p("Esta herramienta de software permite realizar análisis sobre datos de calidad de aire, da facilidades de limpieza de datos, análisis de disponibilidad de datos, análisis comparativos de tiempo y análisis de indicadores de calidad de aire"),
                       hr(),
-                      tags$i("Version: 1.1")
+                      tags$i("Versión: 1.1")
                       
                ),
                column(4,
                       h4("Alianza:"),
-                      p("Esta es una herramienta de libre acceso desarrollada por el departamento de ingenieria industrial de Universidad de los Andes (Bogota D.C.)"),
+                      p("Esta es una herramienta de libre acceso desarrollada por el departamento de ingeniería industrial de Universidad de los Andes (Bogotá D.C.)"),
                       p("Esta herramienta es fruto de una alianza entre la Universidad de los Andes y el Ministerio de Ambiente y Desarrollo Sostenible")
                ),
                column(4,
                       h4("Contacto:"),
-                      a(href = "www.uniandes.edu.co","Universidad de los Andes" ),
+                      a(href = "https:\\www.uniandes.edu.co","Universidad de los Andes" ),
                       br(),
-                      a(href ="www.minambiente.gov.co", "MinAmbiente:"),
+                      a(href ="https:\\www.minambiente.gov.co", "MinAmbiente:"),
                       p("Correos de contacto:"),
                       tags$ul(
-                        tags$li(a(href = "mailto:jj.diaz1067@uniandes.edu.co", "Juan Jose Diaz Baquero: jj.diaz1067@uniandes.edu.co")),
-                        tags$li(a(href = "n.rojas13@uniandes.edu.co", "Nicolas Rojas: n.rojas13@uniandes.edu.co")),
-                        tags$li(a(href = "jffranco@uniandes.edu.co", "Juan Felipe Franco: jffranco@uniandes.edu.co")),                        
-                        tags$li(a(href = "i.mura@uniandes.edu.co", "Ivan Mura: i.mura@uniandes.edu.co"))
+                        tags$li(a(href = "mailto:jj.diaz1067@uniandes.edu.co", "Juan Jose Díaz Baquero: jj.diaz1067@uniandes.edu.co")),
+                        tags$li(a(href = "mailto:n.rojas13@uniandes.edu.co", "Nicolas Rojas: n.rojas13@uniandes.edu.co")),
+                        tags$li(a(href = "mailto:jffranco@uniandes.edu.co", "Juan Felipe Franco: jffranco@uniandes.edu.co")),                        
+                        tags$li(a(href = "mailto:i.mura@uniandes.edu.co", "Ivan Mura: i.mura@uniandes.edu.co"))
                       )
                )
              )),
     tabPanel("Carga de datos", uiOutput(ns("data_loading"))),
     tabPanel("Limpieza de datos", uiOutput(ns("data_cleaning"))),
-    tabPanel("Analisis de datos", uiOutput(ns("data_analysis"))),
-    tabPanel("Reportes", uiOutput(ns("reports"))),
-    tabPanel("Cuadro de control", uiOutput(ns("dashboard")))
+    tabPanel("Análisis de datos", uiOutput(ns("data_analysis"))),
+    tabPanel("Reportes", uiOutput(ns("reports")))
     
   )
 }
@@ -59,10 +56,5 @@ description <- function(input, output, session){
   })
   output$reports <- renderUI({
       p("Aqui va la descripcion de la funcion de reportes")
-  })
-  output$dashboard <- renderUI({
-    tagList(
-      p("Aqui va la descripcion de la funcion de visualizar el dashboard")
-    )
   })
 }

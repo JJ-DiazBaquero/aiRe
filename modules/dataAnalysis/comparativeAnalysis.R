@@ -191,7 +191,6 @@ comparativeAnalysis <- function(input, output, session, database) {
   
   output$specialDateNumObsTable <- renderTable({
     reactiveData$intervalData
-    browser()
     if(length(obsTable[paste("Rango",i)]) != length(colSums(!is.na(reactiveData$intervalData[[i]]))))return(NULL)
     isolate({
       obsTable = data.frame(Estacion = names(database[['data']]), row.names = "Estacion")

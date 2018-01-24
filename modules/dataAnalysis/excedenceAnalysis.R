@@ -36,7 +36,7 @@ excedenceAnalysis <- function(input, output, session, database) {
         regulationThresh = 50
       }
       if(database$currentData == "pm10"){
-        regulationThresh = 100
+        regulationThresh = 50
       }
       
       #Get the Data of the selected year
@@ -75,7 +75,7 @@ excedenceAnalysis <- function(input, output, session, database) {
         regulationThresh = 50
       }
       if(database$currentData == "pm10"){
-        regulationThresh = 100
+        regulationThresh = 50
       }
       
       #Get the Data of the selected year
