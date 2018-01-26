@@ -144,6 +144,7 @@ dataCleaning <- function(input, output, session, database){
       # Rule 1 is remove all strings, here we coerce all values to numeric
       if(1 %in% isolate(input$generalRules) && !(1 %in% rulesSummary$rulesApplied)){
         progress$set(0, detail="Regla 1")
+        database[['dataFlags']] <- database[['data']]
         #Encontrar todos los valores de string diferentes en la columna para asi quedar con solo números
         cat("Applying rule 1 \n")
         rule1Array = c(rep(0,nrow(database[['data']])))
@@ -153,6 +154,7 @@ dataCleaning <- function(input, output, session, database){
           strList = lvlsStr[is.na(lvlsInt)]
           rule1Array[database[['data']][,i] %in% strList] = TRUE
           database[['data']][rule1Array == 1,i] = NA
+          database[['dataFlags']][rule1Array == 0,i] = "Data"
           database[['data']][,i] = as.numeric(gsub(",",".",database[['data']][,i]))
           database[['data']][is.nan(database[['data']][,i]),i] = NA
           rulesSummary$data[i-1,2] = sum(rule1Array)/nrow(database[['data']])

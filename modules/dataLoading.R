@@ -43,7 +43,8 @@ dataLoading <- function(input, output, session) {
   database <- reactiveValues(datapm10 = read.csv("databases/PM10_1998_2016_Encsv.csv", sep=";", row.names=NULL, stringsAsFactors=TRUE),
                              datapm2.5 = read.csv("databases/PM2.5_1998_2016_Encsv.csv", sep=";", row.names=NULL, stringsAsFactors=TRUE),
                              data = NULL,
-                             dataType = c(pm10 = NA, pm2.5 = NA))
+                             dataType = c(pm10 = NA, pm2.5 = NA),
+                             dataFlags = NULL)
   database[['data']] <- database[['datapm2.5']]
   database$currentData = 'pm2.5'
   

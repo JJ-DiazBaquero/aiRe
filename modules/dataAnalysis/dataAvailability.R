@@ -3,8 +3,20 @@ dataAvailabilityUI <- function(id) {
   ns <- NS(id)
   titlePanel("Disponibilidad de datos")
   fluidPage(title = "Disponibilidad de datos",
-            actionButton(ns("recalculateMatrix"),"Calcular disponibilidad de datos"),
-            plotlyOutput(ns("heatMap")))
+            tabsetPanel(
+              tabPanel("Disponibilidad de datos", 
+                       wellPanel(
+                         p("El siguiente gráfico muestra la diponibilidad de datos a lo largo del tiempo, las zonas en amarillo tienen mayor disponibilidad de datos"),
+                         actionButton(ns("recalculateMatrix"),"Calcular disponibilidad de datos")
+                       ),plotlyOutput(ns("heatMap"))),
+              tabPanel("Densidad de banderas",
+                       wellPanel(
+                         p("El siguiente gráfico muestra la distribución de banderas en los datos"),
+                         sliderInput(ns("dateRangeFlags"), "Años:",
+                                     min = 1998, max = 2016, value = c(2013,2016))
+                       ),plotlyOutput(ns("heatMapFlags")))
+            )
+  )
 }
 
 dataAvailability <- function(input, output, session, database) {
@@ -87,5 +99,72 @@ dataAvailability <- function(input, output, session, database) {
       layout(p, title = paste("Disponibilidad de datos agregado diario para",database$currentData),
              xaxis = list(title = "Tiempo"))
     }
+  })
+  output$heatMapFlags <- renderPlotly({
+    progress <- Progress$new(session, min  = 1, max = 6)
+    progress$set(message="Analisis de datos - Matriz de banderas",value =2)
+    on.exit(progress$close())
+    
+    data = database[['dataFlags']]
+    initialDate = as.POSIXct(paste("01-01-",input$dateRangeFlags[1],sep = ""),format = "%d-%m-%Y")
+    finalDate = as.POSIXct(paste("31-12-",input$dateRangeFlags[2],sep = ""),format = "%d-%m-%Y")
+    data = data[data[,1] >= initialDate & data[,1] <= finalDate,]
+    
+    progress$inc(1)
+    
+    y = lapply(data[,-1], levels)
+    z = lapply(y, gsub, pattern = ",", replacement = ".")
+    numbers = lapply(z, as.numeric)
+    
+    progress$inc(1)
+    
+    factors = c()
+    for(i in 2:length(data)){
+      data[!is.na(as.numeric(gsub(data[,i],pattern = ",", replacement = "."))),i] = NA
+      factors = c(factors,levels(factor(data[,i])))
+    }
+    factors = unique(factors)
+    
+    progress$inc(1)
+    
+    require(RColorBrewer)
+    
+    #w = stack(data, select = paste(colnames(data)[-1], collapse = " + "))
+    x = lapply(data[,-1], as.character)
+    w = stack(x, select = -date)
+    
+    progress$inc(1)
+    
+    w$date = rep(data[,1], length(colnames(data[,-1])))
+    
+    f = levels(factor(w$values))
+    interval.cols <- brewer.pal(length(f),"Set3")
+    interval.cols = colorRampPalette(interval.cols)(length(f))
+    
+    color_s= data.frame(num = 1:(2*length(f)),
+                        name = rep("",length(f)), stringsAsFactors = F)
+    #color_s <- setNames(data.frame(color_s$num, color_s$name), NULL)
+    j = 1
+    for(i in seq(1,2*length(f),2)){
+      color_s[i,1] = (j-1)/length(f)
+      color_s[i+1,1] = (j)/length(f)
+      color_s[i,2] = interval.cols[j]
+      color_s[i+1,2] = interval.cols[j]
+      j = j+1
+    }
+    w$values = factor(w$values)
+    
+    progress$set(message = "Renderizando gráfico")
+    
+    p = plot_ly(
+      z = as.numeric(w$values),
+      type = "heatmap",
+      y = w$ind,
+      x = w$date,
+      xtype = 'date',
+      colorscale= color_s,
+      colorbar = list(tickmode='array', tickvals=1:length(levels(w$ind)), 
+                      ticktext=levels(w$values), len=0.5))
+    p
   })
 }
