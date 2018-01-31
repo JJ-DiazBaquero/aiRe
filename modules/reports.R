@@ -1,6 +1,6 @@
-source("modules/reports/timeSeries.R")
-source("modules/reports/ICA.R")
-source("modules/reports/trends.R")
+source("modules/reports/timeSeries.R", encoding = "UTF-8")
+source("modules/reports/ICA.R", encoding = "UTF-8")
+source("modules/reports/trends.R", encoding = "UTF-8")
 
 reportsUI <- function(id){
   ns <- NS(id)

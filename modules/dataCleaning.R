@@ -11,9 +11,9 @@ dataCleaningUI <- function(id){
       #            selected = 1),
       #hr(),
       checkboxGroupInput(ns("generalRules"), label = h3("Reglas generales"), 
-                         choices = list("1. Restriccion de cadenas de texto" = 1, 
+                         choices = list("1. Restricción de cadenas de texto" = 1, 
                                         "2. Valores negativos y ceros" = 2, 
-                                        "3. Limite de deteccion del equipo" = 3)
+                                        "3. Límite de detección de los equipos" = 3)
                          ),
       checkboxGroupInput(ns("particularRules"), label = h3("Reglas particulares a PM2.5"), 
                          choices = list("4. Asegurar PM10 > PM2.5" = 4)
@@ -26,7 +26,7 @@ dataCleaningUI <- function(id){
       downloadButton(ns('downloadData'), 'Descargar los datos')
     ),
     mainPanel(
-      p("El siguiente grafico indica el porcentaje de los datos que pertenecen a la categoria en la derecha"),
+      p("El siguiente gráfico indica el porcentaje de los datos que pertenecen a la categoría indicada a la derecha"),
       plotlyOutput(ns("plot")),
       tableOutput(ns("rulesTable")),
       verbatimTextOutput(ns("summary"))
@@ -278,11 +278,11 @@ dataCleaning <- function(input, output, session, database){
     }
     rulesSummary$data[,8] = 1 - rowSums(rulesSummary$data[,2:7])
     
-    plotRules = plot_ly(x = rulesSummary$data[,1], y = rulesSummary$data[,8], name = "Porcentaje validos",type = "bar")
+    plotRules = plot_ly(x = rulesSummary$data[,1], y = rulesSummary$data[,8], name = "Porcentaje válidos",type = "bar")
     rule1 <- add_trace(plotRules , x = rulesSummary$data[,1], y = rulesSummary$data[,2], name = "Caracteres", type = "bar")
     rule2 <- add_trace(rule1 , x = rulesSummary$data[,1], y = rulesSummary$data[,3], name = "Valores negativos", type = "bar")
-    rule3 <- add_trace(rule2 , x = rulesSummary$data[,1], y = rulesSummary$data[,4], name = "Limite deteccion", type = "bar")
-    rule4 <- add_trace(rule3 , x = rulesSummary$data[,1], y = rulesSummary$data[,5], name = "Valoracion cruzada", type = "bar")
+    rule3 <- add_trace(rule2 , x = rulesSummary$data[,1], y = rulesSummary$data[,4], name = "Límite detección", type = "bar")
+    rule4 <- add_trace(rule3 , x = rulesSummary$data[,1], y = rulesSummary$data[,5], name = "Valoración cruzada", type = "bar")
     #progress$inc(1)
     layout <- layout(rule4, barmode = "stack", title = paste("Porcentaje de datos en cada regla entre",input$dateRange[1],"y",input$dateRange[2]), 
                      xaxis = list(title = ""), 

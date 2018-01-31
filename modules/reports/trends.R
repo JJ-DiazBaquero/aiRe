@@ -3,7 +3,7 @@ library(scales)
 library(grid)
 trendsUI <- function(id){
   ns <- NS(id)
-  titlePanel("Analisis de tendencias")
+  titlePanel("Análisis de tendencias")
   fluidPage(
   uiOutput(ns("stations")),
   plotlyOutput(ns("trendPlot2")),
@@ -16,7 +16,7 @@ trends <- function(input, output, session, database){
   output$stations <- renderUI({
     options = c(colnames(database[['data']])[-1],"Todas las estaciones")
     options = setNames(options,c(colnames(database[['data']])[-1],"Todas las estaciones"))
-    selectInput(ns("selectedStation"), "Seleccionar estacion a mostrar", 
+    selectInput(ns("selectedStation"), "Seleccionar estación a mostrar", 
                 choices = options,
                 selected = options[1])
   })

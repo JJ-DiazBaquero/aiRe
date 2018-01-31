@@ -3,7 +3,7 @@ ICAUI <- function(id){
   ns <- NS(id)
   titlePanel("Indicador ICA")
   fluidPage(
-    actionButton(ns("recalculateMatrix"),"Calcular indice"),
+    actionButton(ns("recalculateMatrix"),"Calcular índice"),
     sliderInput(ns("excedenceThreshold"), "Indique porcentaje permisible de datos válidos (%)",
                 min = 0,max = 100, value = 75),
     plotlyOutput(ns("heatMapICA")),
@@ -29,7 +29,7 @@ ICA <- function(input, output, session, database){
         ICA_vars = list()
         #Loading bar
         progress <- Progress$new(session, min  = 2, max = length(database[['data']]))
-        progress$set(message="Analisis de datos - Indice de Calidad del Aire",value = 2)
+        progress$set(message="Análisis de datos - Índice de Calidad del Aire",value = 2)
         on.exit(progress$close())
         #Parse for plotly
         days_over_list = list()
@@ -128,15 +128,15 @@ ICA <- function(input, output, session, database){
     p = plot_ly(
       x = names(database[['data']])[-c(1)],
       y = c(ICA_dataSummary$days_over_df_verde),
-      name = "Dias en verde",
+      name = "Días en verde",
       type = "bar"
     )
-    amarillo <- add_trace(p , x = names(database[['data']])[-c(1)], y = c(ICA_dataSummary$days_over_df_amarillo), name = "Dias en amarillo", type = "bar")
-    naranja <- add_trace(amarillo , x = names(database[['data']])[-c(1)], y = c(ICA_dataSummary$days_over_df_naranja), name = "Dias en naranja", type = "bar")
-    rojo <- add_trace(naranja , x = names(database[['data']])[-c(1)], y = c(ICA_dataSummary$days_over_df_rojo), name = "Dias en rojo", type = "bar")
-    purpura <- add_trace(rojo , x = names(database[['data']])[-c(1)], y = c(ICA_dataSummary$days_over_df_purpura), name = "Dias en purpura", type = "bar")
-    marron <- add_trace(purpura , x = names(database[['data']])[-c(1)], y = c(ICA_dataSummary$days_over_df_marron), name = "Dias en marron", type = "bar")
-    layout <- layout(marron, barmode = "stack", title = paste("Porcentaje de dias en cada nivel para ", database$currentData), 
+    amarillo <- add_trace(p , x = names(database[['data']])[-c(1)], y = c(ICA_dataSummary$days_over_df_amarillo), name = "Días en amarillo", type = "bar")
+    naranja <- add_trace(amarillo , x = names(database[['data']])[-c(1)], y = c(ICA_dataSummary$days_over_df_naranja), name = "Días en naranja", type = "bar")
+    rojo <- add_trace(naranja , x = names(database[['data']])[-c(1)], y = c(ICA_dataSummary$days_over_df_rojo), name = "Días en rojo", type = "bar")
+    purpura <- add_trace(rojo , x = names(database[['data']])[-c(1)], y = c(ICA_dataSummary$days_over_df_purpura), name = "Días en purpura", type = "bar")
+    marron <- add_trace(purpura , x = names(database[['data']])[-c(1)], y = c(ICA_dataSummary$days_over_df_marron), name = "Días en marron", type = "bar")
+    layout <- layout(marron, barmode = "stack", title = paste("Porcentaje de días en cada nivel para ", database$currentData), 
                      xaxis = list(title = ""), 
                      yaxis = list(title = "Porcentaje de datos"))
   })

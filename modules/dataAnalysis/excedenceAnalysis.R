@@ -5,7 +5,7 @@ excedenceAnalysisUI <- function(id) {
   sidebarLayout(
     sidebarPanel(
       uiOutput(ns("yearUI")),
-      sliderInput(ns("excedenceThreshold"), "Indique porcentaje de tolerancia diaria a datos faltantes (%)",
+      sliderInput(ns("excedenceThreshold"), "Porcentaje de tolerancia diaria a datos faltantes (%)",
                   min = 0,max = 100, value = 75)
     ),
     mainPanel(
@@ -57,11 +57,11 @@ excedenceAnalysis <- function(input, output, session, database) {
       stations = colnames(avgData)[-1]
     }
     
-    p <- plot_ly(x = stations,y = excedenceDays, type = "bar", name = "Dias que exceden la norma", marker = list(color = 'rgba(219, 64, 82, 0.7)') )
-    p <- add_trace(p, y = noDataDays,type = "bar", name = "Dias sin informacion", marker = list(color = 'lightgray') )
-    p <- add_trace(p, y = underLimitDays,type = "bar", name = "Dias por debajo de la norma", marker = list(color = 'rgba(50, 171, 96, 0.7)'))
-    layout(p, barmode = 'stack', 
-           title = paste("Numero de dias que exceden la norma por estacion","en",input$yearSelected,"para",database$currentData),
+    p <- plot_ly(x = stations,y = excedenceDays, type = "bar", name = "Días que exceden la norma", marker = list(color = 'rgba(219, 64, 82, 0.7)') )
+    p <- add_trace(p, y = noDataDays,type = "bar", name = "Días sin información", marker = list(color = 'lightgray') )
+    p <- add_trace(p, y = underLimitDays,type = "bar", name = "Días por debajo de la norma", marker = list(color = 'rgba(50, 171, 96, 0.7)'))
+    layout(p, barmode = "stack", 
+           title = paste("Número de días que exceden la norma por estación","en",input$yearSelected,"para",database$currentData),
            yaxis = list(title = "Dias"))
     
   })
@@ -96,7 +96,7 @@ excedenceAnalysis <- function(input, output, session, database) {
     }
     
     data <- data.frame( station = stations, x = excedenceDays, y = noDataDays)
-    colnames(data) <- c("Estacion","Dias que superan la norma", "Dias sin datos")
+    colnames(data) <- c("Estación","Días que superan la norma", "Días sin datos")
     return(data)
   })
   

@@ -6,10 +6,10 @@ dataLoadingUI <- function(id, label = "Data Loading") {
     sidebarPanel(
              actionButton(ns('Delete'),"Borrar Actual"),
              radioButtons(ns("desiredFormat"), "Por favor elija el formato de sus datos",
-                          choices = c("Documento por contaminante" = 1,"Documento por estacion" = 2 ),
+                          choices = c("Documento por contaminante" = 1,"Documento por estación" = 2 ),
                           selected = 1, inline = FALSE),
              radioButtons(ns("temporality"), "Por favor elija la perioricidad de sus datos",
-                          choices = c("Automatica (horaria)" = 1,"Manual" = 2 ),
+                          choices = c("Automática (horaria)" = 1,"Manual" = 2 ),
                           selected = 1, inline = FALSE),
              uiOutput(ns('optionsUI'))),
     mainPanel(
@@ -139,17 +139,17 @@ dataLoading <- function(input, output, session) {
     ns <- session$ns
     if(input$desiredFormat == 2){
       tagList(
-        textInput(ns('StationName'), "Nombre de la estacion"),
-        fileInput(ns('file'), 'Por favor suba un archivo CSV',
+        textInput(ns('StationName'), "Nombre de la estación"),
+        fileInput(ns('file'), 'Por favor suba un archivo CSV con el formato sugerido',
                   accept=c('text/csv','.csv')),
-        selectInput(ns('newdatabase'), "Seleccione contaminante", c( "PM2.5" =1,"PM10"=2)),
+        selectInput(ns('newdatabase'), "Seleccione contaminante", c( "PM2.5" = 1,"PM10" = 2)),
         actionButton(ns('add'),"Agregar")
       )
     }else{
       tagList(
-        fileInput(ns('file'), 'Por favor suba un archivo CSV',
-                  accept=c('text/csv','.csv')),
-        selectInput(ns('newdatabase'), "Seleccione contaminante", c( "PM2.5" =1,"PM10"=2)),
+        fileInput(ns('file'), 'Por favor suba un archivo CSV con el formato sugerido',
+                  accept = c('text/csv','.csv')),
+        selectInput(ns('newdatabase'), "Seleccione contaminante", c( "PM2.5" = 1,"PM10" = 2)),
         actionButton(ns('add'),"Agregar")
       )
     }

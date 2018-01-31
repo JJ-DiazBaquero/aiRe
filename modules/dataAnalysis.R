@@ -1,16 +1,15 @@
-source("modules/dataAnalysis/dataAvailability.R")
-source("modules/dataAnalysis/comparativeAnalysis.R")
-source("modules/dataAnalysis/excedenceAnalysis.R")
+source("modules/dataAnalysis/dataAvailability.R", encoding = "UTF-8")
+source("modules/dataAnalysis/comparativeAnalysis.R", encoding = "UTF-8")
+source("modules/dataAnalysis/excedenceAnalysis.R", encoding = "UTF-8")
 dataAnalysisUI <- function(id) {
   ns <- NS(id)
   navbarPage(
-    "Herramientas de analisis de datos",
+    "Herramientas de análisis de datos",
     tabPanel("Disponibilidad de datos",
              dataAvailabilityUI(ns("dataAvailability"))),
-    tabPanel("Disponibilidad de datos"),
-    tabPanel("Analisis comparativos",
+    tabPanel("Análisis comparativos",
              comparativeAnalysisUI(ns("comparativeAnalysis"))),
-    tabPanel("Dias que superan la norma",
+    tabPanel("Días que superan la norma",
              excedenceAnalysisUI(ns("excedenceAnalysis")))
   )
 }

@@ -1,4 +1,6 @@
 library("openair")
+
+library(RColorBrewer)
 dataAvailabilityUI <- function(id) {
   ns <- NS(id)
   titlePanel("Disponibilidad de datos")
@@ -26,7 +28,7 @@ dataAvailability <- function(input, output, session, database) {
     isolate({
       if(input$recalculateMatrix == 0) return(NULL)
       progress <- Progress$new(session, min  = 2, max = length(database[['data']]))
-      progress$set(message="Analisis de datos - Matriz de disponibilidad",value =2)
+      progress$set(message="Análisis de datos - Matriz de disponibilidad",value =2)
       on.exit(progress$close())
       dataSummary$data = matrix(0,
                                 nrow = nrow(database[['data']]),
@@ -127,7 +129,6 @@ dataAvailability <- function(input, output, session, database) {
     
     progress$inc(1)
     
-    require(RColorBrewer)
     
     #w = stack(data, select = paste(colnames(data)[-1], collapse = " + "))
     x = lapply(data[,-1], as.character)
