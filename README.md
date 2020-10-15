@@ -39,8 +39,10 @@ shiny::runApp()
 ```
 By default RStudio will open a built-in browser, it is recommended to open aiRe in a wide supported browser such as Chrome or Firefox
 
-Note: This app comes already with some data from Bogota's air quality, you can use this
-data to explore aiRe's functionalities, plots, and to guide yourself on what kind
- of format does aiRe need in order to work, this can be found under
-  the `databases` folder
+## File structure
 
+All the main R code is found inside the `modules` folder
+All air quality data is found inside the `databases` folder,
+this app comes already with some data from Bogota's air quality, you can use this
+data to explore aiRe's features and to guide yourself on what kind
+of data format does aiRe need in order to work
