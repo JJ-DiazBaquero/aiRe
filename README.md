@@ -42,7 +42,10 @@ By default RStudio will open a built-in browser, it is recommended to open aiRe 
 ## File structure
 
 All the main R code is found inside the `modules` folder
+
 All air quality data is found inside the `databases` folder,
 this app comes already with some data from Bogota's air quality, you can use this
 data to explore aiRe's features and to guide yourself on what kind
 of data format does aiRe need in order to work
+
+In the `www` are for external resources of a web application
